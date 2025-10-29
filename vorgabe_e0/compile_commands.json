@@ -1,0 +1,32 @@
+[
+  {
+    "directory": "/home/ma7/bsprak/vorgabe_e0",
+    "command": "/home/ma7/arm/bin/arm-none-eabi-gcc -Iinclude -Wall -Wextra -ggdb -ffreestanding -mcpu=cortex-a7 -mfloat-abi=soft -mno-unaligned-access -std=gnu23 -MMD -MP -o build/kernel/start.o -c kernel/start.c",
+    "file": "kernel/start.c"
+  },
+  {
+    "directory": "/home/ma7/bsprak/vorgabe_e0",
+    "command": "/home/ma7/arm/bin/arm-none-eabi-gcc -Iinclude -Wall -Wextra -ggdb -ffreestanding -mcpu=cortex-a7 -mfloat-abi=soft -mno-unaligned-access -std=gnu23 -MMD -MP -o build/arch/bsp/yellow_led.o -c arch/bsp/yellow_led.c",
+    "file": "arch/bsp/yellow_led.c"
+  },
+  {
+    "directory": "/home/ma7/bsprak/vorgabe_e0",
+    "command": "/home/ma7/arm/bin/arm-none-eabi-gcc -Iinclude -Wall -Wextra -ggdb -ffreestanding -mcpu=cortex-a7 -mfloat-abi=soft -mno-unaligned-access -std=gnu23 -MMD -MP -o build/lib/ubsan.o -c lib/ubsan.c",
+    "file": "lib/ubsan.c"
+  },
+  {
+    "directory": "/home/ma7/bsprak/vorgabe_e0",
+    "command": "/home/ma7/arm/bin/arm-none-eabi-gcc -Iinclude -Wall -Wextra -ggdb -ffreestanding -mcpu=cortex-a7 -mfloat-abi=soft -mno-unaligned-access -std=gnu23 -MMD -MP -o build/lib/mem.o -c lib/mem.c",
+    "file": "lib/mem.c"
+  },
+  {
+    "directory": "/home/ma7/bsprak/vorgabe_e0",
+    "command": "/home/ma7/arm/bin/arm-none-eabi-gcc -Iinclude -Wall -Wextra -ggdb -ffreestanding -mcpu=cortex-a7 -mfloat-abi=soft -mno-unaligned-access -std=gnu23 -MMD -MP -o build/arch/cpu/entry.o -c arch/cpu/entry.S",
+    "file": "arch/cpu/entry.S"
+  },
+  {
+    "directory": "/home/ma7/bsprak/vorgabe_e0",
+    "command": "/home/ma7/arm/bin/arm-none-eabi-gcc -Iinclude -Wall -Wextra -ggdb -ffreestanding -mcpu=cortex-a7 -mfloat-abi=soft -mno-unaligned-access -std=gnu23 -MMD -MP -o build/user/main.o -c user/main.c",
+    "file": "user/main.c"
+  }
+]
