@@ -101,26 +101,26 @@ void unsigned_to_str(unsigned int num, int base, bool padding, int field_width)
 	}
 }
 
-void kprintf(char *string, ...)
+void kprintf(const char *format, ...)
 {
 	va_list args;
 
-	va_start(args, string);
-	for (int i = 0; string[i]; i++) {
+	va_start(args, format);
+	for (int i = 0; format[i]; i++) {
 		bool zero_pad	 = false;
 		int  field_width = 0;
 
-		switch (string[i]) {
+		switch (format[i]) {
 		case '%':
-			if (string[i + 1] == '0') {
+			if (format[i + 1] == '0') {
 				zero_pad = true;
 				i++;
 			}
-			if (string[i + 1] == '8') {
+			if (format[i + 1] == '8') {
 				field_width = 8;
 				i++;
 			}
-			switch (string[i + 1]) {
+			switch (format[i + 1]) {
 			case 'i':
 				int_to_str(va_arg(args, int), zero_pad, field_width);
 				i++;
@@ -152,10 +152,11 @@ void kprintf(char *string, ...)
 						field_width);
 				i++;
 				break;
-			case 'p':
+			case 'p': 
+				void *ptr = va_arg(args, void *);
 				uart_putc('0');
 				uart_putc('x');
-				unsigned_to_str(va_arg(args, unsigned int), 16, true, 8);
+				unsigned_to_str((unsigned int)(unsigned long)ptr, 16, true, 8);
 				i++;
 				break;
 			case '%':
@@ -163,17 +164,17 @@ void kprintf(char *string, ...)
 				i++;
 				break;
 			default:
-				char *unknown = "Unknown conversion specifier:";
+				char *unknown = "Unknown conversion specifier";
 				int   j	      = 0;
 				while (unknown[j]) {
 					uart_putc(unknown[j]);
-							j++;
+					j++;
 				}
 				break;
 			}
 			break;
 		default:
-			uart_putc(string[i]);
+			uart_putc(format[i]);
 		}
 	}
 	va_end(args);

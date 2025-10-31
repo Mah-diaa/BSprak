@@ -1,7 +1,7 @@
 #include <config.h>
 #include <arch/bsp/uart.h>
 #include <lib/kprintf.h>
-#include <kernel/tests.h>
+#include <lib/tests.h>
 
 void start_kernel()
 {
