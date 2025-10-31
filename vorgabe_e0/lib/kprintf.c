@@ -2,7 +2,6 @@
 #include <arch/bsp/uart.h>
 #include <stdbool.h>
 #include <limits.h>
-#include <limits.h>
 
 char *digit_lookup = "0123456789ABCDEF";
 
@@ -162,6 +161,14 @@ void kprintf(char *string, ...)
 			case '%':
 				uart_putc('%');
 				i++;
+				break;
+			default:
+				char *unknown = "Unknown conversion specifier:";
+				int   j	      = 0;
+				while (unknown[j]) {
+					uart_putc(unknown[j]);
+							j++;
+				}
 				break;
 			}
 			break;
