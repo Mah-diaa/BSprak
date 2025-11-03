@@ -39,6 +39,7 @@ static volatile struct uart *const uart_instance = (struct uart *)UART_BASE;
 void init_uart();
 void uart_putc(char c);
 char uart_getc();
+void uart_loopback [[noreturn]] (void);
 
 
 

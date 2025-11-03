@@ -37,4 +37,9 @@ char uart_getc(void) {
     return uart_instance->DR;
 }
 
+void uart_loopback [[noreturn]] (void) {
+	while (true) {
+		uart_putc(uart_getc());
+	}
+}
 
