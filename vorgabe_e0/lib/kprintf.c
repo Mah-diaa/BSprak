@@ -138,7 +138,6 @@ void kprintf(const char *format, ...)
 				for (int i = 0; str[i]; i++) {
 					uart_putc(str[i]);
 				}
-				uart_putc('\0');
 				i++;
 				break;
 			case 'c':
