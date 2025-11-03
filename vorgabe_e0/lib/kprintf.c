@@ -142,8 +142,7 @@ void kprintf(const char *format, ...)
 				i++;
 				break;
 			case 'c':
-				unsigned char output = va_arg(args, int);
-				uart_putc(output);
+				uart_putc((unsigned char)va_arg(args, int));
 				i++;
 				break;
 
@@ -178,5 +177,4 @@ void kprintf(const char *format, ...)
 		}
 	}
 	va_end(args);
-	uart_putc('\0');
 }

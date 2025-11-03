@@ -34,8 +34,8 @@ void run_kprintf_tests(void)
 
 	kprintf("s:%8s|\n", "hi");
 	kprintf("s:%08s|\n", "hi");
-	kprintf("c:%8c|\n", 'A');
-	kprintf("c:%08c|\n", 'A');
+	kprintf("c:%c|\n", 'A');
+	kprintf("c:%c|\n", 65);
 
 	kprintf("pct:%% done\n");
 
