@@ -28,9 +28,53 @@ void run_kprintf_tests(void)
 	kprintf("neg:%08i\n", INT_MIN);
 
 
-
 	kprintf("Trying x MAX: %x\n", UINT_MAX);
 	kprintf("Trying x zero: %x\n", 0);
+	kprintf("Trying x MIN: %x\n", INT_MIN);
+
+	kprintf("Trying x -1: %x\n", -1);
+
+	// Edge cases for %x
+	kprintf("\n=== Testing %x edge cases ===\n");
+	// Numbers that exactly match field width
+	kprintf("x exact 8 digits: %8x\n", 0xFFFFFFFFu);
+	kprintf("x exact 8 digits zero pad: %08x\n", 0xFFFFFFFFu);
+	kprintf("x exact 8 digits min: %8x\n", (unsigned int)INT_MIN);
+	kprintf("x exact 8 digits min zero pad: %08x\n", (unsigned int)INT_MIN);
+	
+	// Very small numbers with large field widths
+	kprintf("x small with field 8: %8x\n", 0x1u);
+	kprintf("x small with field 8 zero pad: %08x\n", 0x1u);
+	kprintf("x small with field 8: %8x\n", 0xFu);
+	kprintf("x small with field 8 zero pad: %08x\n", 0xFu);
+	
+	// Single digit hex values
+	kprintf("x single digit: %x\n", 0x0u);
+	kprintf("x single digit: %x\n", 0x1u);
+	kprintf("x single digit: %x\n", 0xAu);
+	kprintf("x single digit: %x\n", 0xFu);
+	
+	// Single digit with field width
+	kprintf("x single digit field 8: %8x\n", 0xFu);
+	kprintf("x single digit field 8 zero pad: %08x\n", 0xFu);
+	
+	// Numbers that exceed field width (should still print all digits)
+	kprintf("x exceeds field 2: %2x\n", 0xFFFFFFFFu);
+	kprintf("x exceeds field 2 zero pad: %02x\n", 0xFFFFFFFFu);
+	
+	// Various edge values
+	kprintf("x 0x7FFFFFFF: %x\n", 0x7FFFFFFFu);
+	kprintf("x 0x80000000: %x\n", 0x80000000u);
+	kprintf("x 0xFFFFFFFE: %x\n", 0xFFFFFFFEu);
+	kprintf("x 0x00000001: %x\n", 0x00000001u);
+	
+	// Negative values as signed ints
+	kprintf("x -1: %x\n", -1);
+	kprintf("x -1 field 8: %8x\n", -1);
+	kprintf("x -1 field 8 zero pad: %08x\n", -1);
+	kprintf("x INT_MIN field 8: %8x\n", INT_MIN);
+	kprintf("x INT_MIN field 8 zero pad: %08x\n", INT_MIN);
+
 	kprintf("neg:%08i\n", INT_MIN);
 
 	kprintf("%08i %i\n", 42, 42);
