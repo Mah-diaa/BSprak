@@ -76,18 +76,14 @@ void unsigned_to_str(unsigned int num, int base, bool padding, int field_width)
 	if (num == 0) {
 		buffer[index] = '0';
 		index--;
-		if (field_width > 0) {
-			field_width--;
-		}
+		field_width--;
 	}
 	while (num > 0) {
 		int digit     = num % base;
 		buffer[index] = digit_lookup[digit];
 		num /= base;
 		index--;
-		if (field_width > 0) {
-			field_width--;
-		}
+		field_width--;
 	}
 	while (field_width > 0) {
 		if (padding) {
