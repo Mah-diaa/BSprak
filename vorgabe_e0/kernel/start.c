@@ -13,7 +13,6 @@ void start_kernel()
 
 	while (true) {
 		char c = uart_getc();
-		uart_putc(c);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
