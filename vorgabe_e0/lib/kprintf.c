@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <limits.h>
 
-char *digit_lookup = "0123456789ABCDEF";
+char *digit_lookup = "0123456789abcdef";
 
 //function to handle signed values
 void int_to_str(int num, bool padding, int field_width)
