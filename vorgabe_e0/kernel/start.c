@@ -9,7 +9,7 @@ void start_kernel()
 	test_kernel();
 	
 	// Uncomment the line below to run kprintf tests
-	// run_kprintf_tests();
+	run_kprintf_tests();
 
 	while (true) {
 		char c = uart_getc();

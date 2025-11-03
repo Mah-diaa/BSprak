@@ -27,6 +27,12 @@ void run_kprintf_tests(void)
 	kprintf("neg:%08i\n", -1);
 	kprintf("neg:%08i\n", INT_MIN);
 
+
+
+	kprintf("Trying x MAX: %x\n", UINT_MAX);
+	kprintf("Trying x zero: %x\n", 0);
+	kprintf("neg:%08i\n", INT_MIN);
+
 	kprintf("%08i %i\n", 42, 42);
 	kprintf("%8i %08i\n", 7, 7);
 

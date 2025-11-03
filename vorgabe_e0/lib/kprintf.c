@@ -74,8 +74,9 @@ void unsigned_to_str(unsigned int num, int base, bool padding, int field_width)
 	buffer[11] = '\0';
 
 	if (num == 0) {
-		uart_putc('0');
-		return;
+		buffer[index] = '0';
+		index--;
+		field_width--;
 	}
 	while (num > 0) {
 		int digit     = num % base;
@@ -146,7 +147,7 @@ void kprintf(const char *format, ...)
 				break;
 
 			case 'x':
-				unsigned_to_str(va_arg(args, unsigned int), 16, zero_pad,
+				unsigned_to_str((unsigned int)va_arg(args, int), 16, zero_pad,
 						field_width);
 				i++;
 				break;
