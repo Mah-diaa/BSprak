@@ -9,10 +9,10 @@ void verify_stacks(void)
 {
 	unsigned int sp_svc, sp_und, sp_abt, sp_irq, sp_sys;
 	unsigned int expected_svc = 0x100000;
-	unsigned int expected_und = 0xFFC00;
-	unsigned int expected_abt = 0xFF800;
-	unsigned int expected_irq = 0xFF400;
-	unsigned int expected_sys = 0xFF000;
+	unsigned int expected_und = 0xFF800;
+	unsigned int expected_abt = 0xFF000;
+	unsigned int expected_irq = 0xFE800;
+	unsigned int expected_sys = 0xFE000;
 
 	kprintf("\n=== Verifying Stack Pointers ===\n");
 
@@ -35,16 +35,16 @@ void verify_stacks(void)
 	kprintf("SYS stack: 0x%08x (expected: 0x%08x) %s\n",
 		sp_sys, expected_sys, (sp_sys == expected_sys) ? "✓" : "✗");
 
-	/* Check spacing (each should be 0x400 apart) */
-	kprintf("\n=== Checking Stack Spacing (1 KiB = 0x400) ===\n");
-	kprintf("SVC -> UND: 0x%x (expected: 0x400) %s\n",
-		sp_svc - sp_und, (sp_svc - sp_und == 0x400) ? "✓" : "✗");
-	kprintf("UND -> ABT: 0x%x (expected: 0x400) %s\n",
-		sp_und - sp_abt, (sp_und - sp_abt == 0x400) ? "✓" : "✗");
-	kprintf("ABT -> IRQ: 0x%x (expected: 0x400) %s\n",
-		sp_abt - sp_irq, (sp_abt - sp_irq == 0x400) ? "✓" : "✗");
-	kprintf("IRQ -> SYS: 0x%x (expected: 0x400) %s\n",
-		sp_irq - sp_sys, (sp_irq - sp_sys == 0x400) ? "✓" : "✗");
+	/* Check spacing (each should be 0x800 apart) */
+	kprintf("\n=== Checking Stack Spacing (2 KiB = 0x800) ===\n");
+	kprintf("SVC -> UND: 0x%x (expected: 0x800) %s\n",
+		sp_svc - sp_und, (sp_svc - sp_und == 0x800) ? "✓" : "✗");
+	kprintf("UND -> ABT: 0x%x (expected: 0x800) %s\n",
+		sp_und - sp_abt, (sp_und - sp_abt == 0x800) ? "✓" : "✗");
+	kprintf("ABT -> IRQ: 0x%x (expected: 0x800) %s\n",
+		sp_abt - sp_irq, (sp_abt - sp_irq == 0x800) ? "✓" : "✗");
+	kprintf("IRQ -> SYS: 0x%x (expected: 0x800) %s\n",
+		sp_irq - sp_sys, (sp_irq - sp_sys == 0x800) ? "✓" : "✗");
 
 	kprintf("\n");
 }

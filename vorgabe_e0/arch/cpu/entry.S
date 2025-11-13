@@ -166,6 +166,41 @@ _exitHyper:
 	msr spsr_hyp, r0
 	eret
 
+/*
+ * read_sp_from_mode - Read stack pointer from a specific processor mode
+ * Input: r0 = mode (enum psr_mode value)
+ * Output: r0 = stack pointer value from that mode
+ */
+.global read_sp_from_mode
+read_sp_from_mode:
+	/* Save current CPSR and LR to registers (can't use stack across mode switches) */
+	mrs r2, cpsr
+	mov r3, lr
+	
+	/* Prepare new CPSR: preserve flags, disable interrupts, change only mode */
+	/* r0 contains the mode value (e.g., 0x13 for SVC) */
+	/* Clear mode bits and interrupt bits, then set new mode and disable interrupts */
+	bic r1, r2, #0x1F
+	bic r1, r1, #0xC0	/* Clear I and F bits */
+	orr r1, r1, r0		/* Set new mode */
+	orr r1, r1, #0xC0	/* Set I and F bits to disable interrupts */
+	
+	/* Switch to requested mode with interrupts disabled */
+	msr cpsr, r1
+	
+	/* Read SP from the requested mode */
+	mov r1, sp
+	
+	/* Restore original CPSR (this restores mode, flags, and interrupt state) */
+	msr cpsr, r2
+	
+	/* Move SP value to return register */
+	mov r0, r1
+	
+	/* Restore LR and return */
+	mov lr, r3
+	bx lr
+
 exception_trampoline supervisor_call_trampoline, 4
 exception_trampoline undefined_instruction_trampoline, 4
 exception_trampoline prefetch_abort_trampoline, 4
