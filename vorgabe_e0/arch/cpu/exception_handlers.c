@@ -1,6 +1,19 @@
 #include <arch/cpu/exception_handlers.h>
 #include <arch/cpu/exception_print.h>
+#include <arch/bsp/irq_controller.h>
 #include <lib/kprintf.h>
+#include <stddef.h>
+#include <stdbool.h>
+
+/* External flag to control IRQ debug output */
+extern bool irq_debug;
+
+/* Exception return offsets */
+#define IRQ_RETURN_OFFSET 8
+
+/* Stack frame layout: r0-r12 (13 regs), then lr */
+#define REGS_SAVED_BEFORE_LR 13
+#define LR_STACK_OFFSET (REGS_SAVED_BEFORE_LR * sizeof(unsigned int))
 
 /* Exception handler implementations
  * TODO: Implement these functions to handle each exception type
@@ -70,8 +83,48 @@ void handle_not_used_trampoline(register_context_t* ctx)
 
 void handle_irq_trampoline(register_context_t* ctx)
 {
-	/* TODO: Implement IRQ handler */
-	kprintf("IRQ occurred\n");
+	/* Print exception information if debug is enabled */
+	/* For IRQ, LR contains PC+IRQ_RETURN_OFFSET (return offset is IRQ_RETURN_OFFSET), 
+	 * so exception address is lr - IRQ_RETURN_OFFSET */
+	if (irq_debug) {
+		print_exception_infos(ctx, false, false, "IRQ", ctx->lr - IRQ_RETURN_OFFSET);
+	}
+	
+	/* Handle interrupt sources - check IRQ controller to see which interrupt fired */
+	irq_controller_handler();
+	
+	/* Adjust LR in the context for proper return
+	 * The trampoline will restore registers and return, but it uses 'subs pc, lr, #offset'
+	 * which doesn't restore CPSR from SPSR. So we need to do our own return.
+	 * 
+	 * For IRQ, LR contains PC+IRQ_RETURN_OFFSET, so we subtract IRQ_RETURN_OFFSET
+	 * to get the correct return address.
+	 */
+	ctx->lr -= IRQ_RETURN_OFFSET;
+	
+	/* Now restore registers and return, restoring CPSR from SPSR
+	 * We must be in IRQ mode to access SPSR_irq
+	 * ctx points to the stack frame containing saved r0-r12, lr
+	 */
+	unsigned int lr_offset = LR_STACK_OFFSET;
+	
+	/* Ensure we're in IRQ mode (0x12) for SPSR_irq access */
+	asm volatile("cps #0x12" ::: "memory");
+	
+	/* Restore all registers and return, restoring CPSR from SPSR
+	 * Use r1 as temp base since r0 is in the restore list
+	 * The '^' suffix with PC restores CPSR from SPSR
+	 */
+	asm volatile(
+		"mov r1, %0\n\t"               /* Use r1 as temp base (r0 will be restored) */
+		"ldmfd r1!, {r0-r12, lr}\n\t"  /* Restore r0-r12 and lr from stack */
+		"movs pc, lr\n\t"              /* Return and restore CPSR from SPSR */
+		:
+		: "r" (ctx), "r" (lr_offset)
+		: "r1", "memory"
+	);
+	
+	/* This should never be reached */
 }
 
 void handle_fiq_trampoline(register_context_t* ctx)

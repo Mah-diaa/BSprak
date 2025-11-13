@@ -1,18 +1,30 @@
 #include <lib/kprintf.h>
 #include <config.h>
 #include <arch/bsp/uart.h>
+#include <arch/bsp/timer.h>
+#include <arch/bsp/irq_controller.h>
 #include <arch/cpu/exception_triggers.h>
 #include <lib/regcheck.h>
+#include <stdbool.h>
 
 
 static void subprogram [[noreturn]] (void);
 
-
-
+/* Global flag to control IRQ debug output */
+bool irq_debug = false;
 
 void start_kernel [[noreturn]] (void) {
 	kprintf("=== Betriebssystem gestartet ===\n");
-	bool irq_debug = false;
+	
+	/* Initialize UART first (needed for kprintf) */
+	init_uart();
+	
+	/* Initialize interrupt controller and enable interrupts */
+	irq_controller_init();
+	
+	/* Initialize system timer */
+	system_timer_init();
+	
 	test_kernel();
 	while(true) {
 		char c = uart_getc();
