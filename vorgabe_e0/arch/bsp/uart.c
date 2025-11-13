@@ -1,6 +1,11 @@
 #include <arch/bsp/uart.h>
+#include <lib/ringbuffer.h>
+#include <config.h>
 #include <stddef.h>
 #include <assert.h>
+
+/* Create ring buffer for UART RX characters */
+create_ringbuffer(uart_rx_buffer, UART_INPUT_BUFFER_SIZE);
 
 
 void init_uart(){
@@ -22,8 +27,12 @@ void init_uart(){
 	
 	uart_instance->CR |= 3 << 8; //enable txd and rxd
 	uart_instance->CR |= 1 << 0;//enable uart
-
-
+	
+	/* Enable RX interrupt (bit 4 in IMSC) */
+	uart_instance->IMSC = (1 << 4);
+	
+	/* Clear any pending RX interrupts */
+	uart_instance->ICR = (1 << 4);
 }
 
 
@@ -33,8 +42,26 @@ void uart_putc(char c) {
 }
 
 char uart_getc(void) {
-    while (uart_instance->FR & (1 << 4)) { }  // Wait for RX not empty
-    return uart_instance->DR;
+    /* Wait for data in ring buffer (interrupt-driven) */
+    while (buff_is_empty(uart_rx_buffer)) { }
+    return buff_getc(uart_rx_buffer);
+}
+
+/* Function to be called from IRQ handler when UART RX interrupt occurs */
+void uart_rx_interrupt_handler(void) {
+    /* Check if RX interrupt is pending (bit 4 in MIS) */
+    if (uart_instance->MIS & (1 << 4)) {
+        /* Read one character from UART data register (mask to 8 bits) and put in ring buffer */
+        char c = uart_instance->DR & 0xFF;
+        
+        /* buff_putc returns true if buffer is full (error), false on success */
+        if (buff_putc(uart_rx_buffer, c)) {
+            /* Buffer is full - character is lost (could add error handling) */
+        }
+        
+        /* Clear the RX interrupt by writing 1 to bit 4 in ICR */
+        uart_instance->ICR |= (1 << 4);
+    }
 }
 
 void uart_loopback [[noreturn]] (void) {
