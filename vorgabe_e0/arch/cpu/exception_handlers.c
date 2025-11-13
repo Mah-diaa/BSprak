@@ -77,8 +77,14 @@ void handle_data_abort_trampoline(register_context_t* ctx)
 
 void handle_not_used_trampoline(register_context_t* ctx)
 {
-	/* TODO: Implement not used handler */
-	kprintf("Not Used exception occurred\n");
+	/* Print exception information */
+	/* The trampoline didn't adjust LR (return_offset = 0), so ctx->lr contains the return address */
+	print_exception_infos(ctx, false, false, "Not Used", ctx->lr);
+	
+	/* Halt the system */
+	while (true) {
+		/* Infinite loop to stop execution */
+	}
 }
 
 void handle_irq_trampoline(register_context_t* ctx)
@@ -95,7 +101,13 @@ void handle_irq_trampoline(register_context_t* ctx)
 
 void handle_fiq_trampoline(register_context_t* ctx)
 {
-	/* TODO: Implement FIQ handler */
-	kprintf("FIQ occurred\n");
+	/* Print exception information */
+	/* The trampoline adjusted LR before saving (LR = instruction address), so ctx->lr contains the instruction address */
+	print_exception_infos(ctx, false, false, "FIQ", ctx->lr);
+	
+	/* Halt the system */
+	while (true) {
+		/* Infinite loop to stop execution */
+	}
 }
 
