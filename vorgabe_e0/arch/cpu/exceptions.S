@@ -36,21 +36,6 @@ _not_used: .word not_used_trampoline
 _irq: .word irq_trampoline
 _fiq: .word fiq_trampoline
 
-.global read_sp_from_mode
-read_sp_from_mode:
-	mrs r2, cpsr
-	mov r3, lr
-	bic r1, r2, #0x1F
-	bic r1, r1, #0xC0
-	orr r1, r1, r0
-	orr r1, r1, #0xC0
-	msr cpsr, r1
-	mov r1, sp
-	msr cpsr, r2
-	mov r0, r1
-	mov lr, r3
-	bx lr
-
 exception_trampoline supervisor_call_trampoline, 4
 exception_trampoline undefined_instruction_trampoline, 4
 exception_trampoline prefetch_abort_trampoline, 4

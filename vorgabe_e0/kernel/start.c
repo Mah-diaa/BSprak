@@ -16,15 +16,9 @@ bool irq_debug = false;
 void start_kernel [[noreturn]] (void) {
 	kprintf("=== Betriebssystem gestartet ===\n");
 	
-	/* Initialize UART first (needed for kprintf) */
 	init_uart();
-	
-	/* Initialize interrupt controller and enable interrupts */
 	irq_controller_init();
-	
-	/* Initialize system timer */
 	system_timer_init();
-	
 	test_kernel();
 	while(true) {
 		char c = uart_getc();

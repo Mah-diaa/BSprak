@@ -2,7 +2,6 @@
 #include "arch/cpu/registers.h"
 #include <arch/cpu/exception_print.h>
 #include <arch/cpu/psr.h>
-#include <arch/cpu/psr_bits.h>
 #include <lib/kprintf.h>
 const char* get_fsr_description(unsigned int fsr){
     static const char *fsr_sources[] = {
@@ -128,7 +127,7 @@ mode_regs_t read_mode_specific_registers(void)
 }
 
 void print_exception_infos(register_context_t* ctx, bool is_data_abort, bool is_prefetch_abort, char* exception_name, unsigned int exception_source_addr) {
-	kprintf("EXCEPTION\n");
+	kprintf("############ EXCEPTION ############\n");
 	kprintf("%s an Adresse: 0x%08x\n", exception_name, exception_source_addr);
 	if(is_data_abort) {
 		const char* dfsr_description = get_fsr_description(ctx->dfsr);
