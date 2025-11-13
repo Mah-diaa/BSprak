@@ -2,6 +2,7 @@
 #define REGISTERS_H_
 
 typedef struct register_context{
+	unsigned int spsr;
 	unsigned int r0;
 	unsigned int r1;
 	unsigned int r2;
@@ -22,7 +23,6 @@ typedef struct register_context{
 	unsigned int sp;
 	
 	unsigned int cpsr;
-	unsigned int spsr;
 
 	unsigned int dfsr;
 	unsigned int dfar;

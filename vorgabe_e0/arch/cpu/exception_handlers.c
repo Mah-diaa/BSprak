@@ -5,7 +5,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-/* External flag to control IRQ debug output */
 extern bool irq_debug;
 
 /* Exception return offsets */
