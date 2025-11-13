@@ -4,11 +4,31 @@
 //macro (Hope this works)
 .macro exception_trampoline handler_name, return_offset
 \handler_name:
-    stmdb sp!, {r0-r12, lr}
+    /* Adjust LR before saving if return_offset is not 0 */
+    .if \return_offset != 0
+    sub lr, lr, #\return_offset
+    .endif
+    
+    /* Save r0-r12 and lr to stack */
+    stmfd sp!, {r0-r12, lr}
+    
+    /* Save SPSR (saved by hardware automatically when exception occurred) */
+    mrs r0, spsr
+    push {r0}
+    
+    /* Pass stack pointer to C handler */
     mov r0, sp
     bl handle_\handler_name
+    
+    /* Restore SPSR */
+    pop {r0}
+    msr spsr, r0
+    
+    /* Restore r0-r12 and lr */
     ldmfd sp!, {r0-r12, lr}
-    subs pc, lr, #\return_offset
+    
+    /* Return: movs pc, lr restores PC and CPSR from SPSR */
+    movs pc, lr
 .endm
 
 
@@ -146,9 +166,9 @@ _exitHyper:
 	msr spsr_hyp, r0
 	eret
 
-exception_trampoline supervisor_call_trampoline, 0
-exception_trampoline undefined_instruction_trampoline, 0
-exception_trampoline prefetch_abort_trampoline, 0
+exception_trampoline supervisor_call_trampoline, 4
+exception_trampoline undefined_instruction_trampoline, 4
+exception_trampoline prefetch_abort_trampoline, 4
 exception_trampoline data_abort_trampoline, 8
 exception_trampoline not_used_trampoline, 0
 exception_trampoline irq_trampoline, 4

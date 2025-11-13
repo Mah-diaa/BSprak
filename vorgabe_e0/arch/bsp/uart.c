@@ -49,14 +49,16 @@ char uart_getc(void) {
 
 /* Function to be called from IRQ handler when UART RX interrupt occurs */
 void uart_rx_interrupt_handler(void) {
-    /* Check if RX interrupt is pending (bit 4 in RIS or MIS) */
+    /* Check if RX interrupt is pending (bit 4 in MIS) */
     if (uart_instance->MIS & (1 << 4)) {
-        /* Read character from UART data register and put in ring buffer */
-        char c = uart_instance->DR;
+        /* Read one character from UART data register (mask to 8 bits) and put in ring buffer */
+        char c = uart_instance->DR & 0xFF;
+        
         /* buff_putc returns true if buffer is full (error), false on success */
         if (buff_putc(uart_rx_buffer, c)) {
             /* Buffer is full - character is lost (could add error handling) */
         }
+        
         /* Clear the RX interrupt by writing 1 to bit 4 in ICR */
         uart_instance->ICR |= (1 << 4);
     }
