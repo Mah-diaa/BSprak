@@ -33,7 +33,6 @@ void start_kernel [[noreturn]] (void) {
 				do_prefetch_abort();
 				break;
 			case 's':
-				kprintf("Exception");
 				do_supervisor_call();
 				break;
 			case 'u':
