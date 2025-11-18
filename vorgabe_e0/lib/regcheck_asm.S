@@ -287,4 +287,3 @@ _check_spsr:
 	msr	spsr, r4
 	pop	{r4}
 	bx	lr
-

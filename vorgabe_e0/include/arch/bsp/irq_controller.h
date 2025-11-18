@@ -7,13 +7,13 @@
 static const unsigned int IRQ_CONTROLLER_BASE = 0x7E00B000 - 0x3F000000;
 
 struct irq_controller {
-	unsigned int unused[128];      /* Registers 0x000-0x1FC (128 * 4 = 0x200) */
-	unsigned int IRQ_basic_pending; /* IRQ basic pending at offset 0x200 */
-	unsigned int PENDING_1;        /* IRQ pending 1 at offset 0x204 */
-	unsigned int PENDING_2;        /* IRQ pending 2 at offset 0x208 */
-	unsigned int FIQ_control;      /* FIQ control at offset 0x20C */
-	unsigned int ENABLE_1;         /* Enable IRQs 1 at offset 0x210 */
-	unsigned int ENABLE_2;         /* Enable IRQs 2 at offset 0x214 */
+	unsigned int unused[128];      // Registers 0x000-0x1FC (128 * 4 = 0x200)
+	unsigned int IRQ_basic_pending;
+	unsigned int PENDING_1;
+	unsigned int PENDING_2;
+	unsigned int FIQ_control;
+	unsigned int ENABLE_1;
+	unsigned int ENABLE_2;
 };
 
 static_assert(offsetof(struct irq_controller, IRQ_basic_pending) == 0x200);
@@ -23,15 +23,12 @@ static_assert(offsetof(struct irq_controller, FIQ_control) == 0x20C);
 static_assert(offsetof(struct irq_controller, ENABLE_1) == 0x210);
 static_assert(offsetof(struct irq_controller, ENABLE_2) == 0x214);
 
-static volatile struct irq_controller *const irq_controller_instance = 
+static volatile struct irq_controller *const irq_controller_instance =
 	(struct irq_controller *)IRQ_CONTROLLER_BASE;
 
-/* Interrupt masks */
-#define TIMER_INTERRUPT_MASK (1 << 1)   /* Timer interrupt in PENDING_1/ENABLE_1 */
-#define UART_INTERRUPT_MASK (1 << 25)   /* UART interrupt in PENDING_2/ENABLE_2 */
-
+#define TIMER_INTERRUPT_MASK (1 << 1)
+#define UART_INTERRUPT_MASK (1 << 25)
 void irq_controller_init(void);
 void irq_controller_handler(void);
 
 #endif // IRQ_CONTROLLER_H_
-

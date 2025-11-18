@@ -33,4 +33,3 @@ enum psr_mode {
 #define PSR_STATUS_MASK 0xF0000000
 
 #endif // PSR_H_
-

@@ -4,4 +4,3 @@
 void register_checker(void);
 
 #endif // REGCHECK_H_
-

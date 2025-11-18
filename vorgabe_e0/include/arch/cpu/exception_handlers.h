@@ -12,4 +12,3 @@ void handle_irq_trampoline(register_context_t* ctx);
 void handle_fiq_trampoline(register_context_t* ctx);
 
 #endif // EXCEPTION_HANDLERS_H_
-

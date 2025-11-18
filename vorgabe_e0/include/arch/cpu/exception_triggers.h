@@ -14,4 +14,3 @@ void do_data_abort(void);
 void do_prefetch_abort(void);
 
 #endif // EXCEPTION_TRIGGERS_H_
-

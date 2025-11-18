@@ -17,7 +17,7 @@ void int_to_str(int num, bool padding, int field_width)
 		neg = true;
 		field_width--;
 		if (num ==
-		    INT_MIN) { //workaround for the min int edge case, TODO: find a way to make this less explicit
+		    INT_MIN) {
 			const char *s = "-2147483648";
 			for (int i = 0; s[i]; i++)
 				uart_putc(s[i]);
@@ -60,8 +60,7 @@ void int_to_str(int num, bool padding, int field_width)
 		neg = false;
 	}
 
-	for (index++; buffer[index];
-	     index++) { //we could reuse the same index, just increment once.
+	for (index++; buffer[index]; index++) {
 		uart_putc(buffer[index]);
 	}
 }
@@ -151,7 +150,7 @@ void kprintf(const char *format, ...)
 						field_width);
 				i++;
 				break;
-			case 'p': 
+			case 'p':
 				void *ptr = va_arg(args, void *);
 				uart_putc('0');
 				uart_putc('x');

@@ -76,4 +76,3 @@ void register_checker(void)
 
 	kprintf("Fertig! Es _scheint_ so, als wuerde es funktionieren.\n");
 }
-

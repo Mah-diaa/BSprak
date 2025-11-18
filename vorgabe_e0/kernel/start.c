@@ -7,15 +7,13 @@
 #include <lib/regcheck.h>
 #include <stdbool.h>
 
-
 static void subprogram [[noreturn]] (void);
 
-/* Global flag to control IRQ debug output */
 bool irq_debug = false;
 
 void start_kernel [[noreturn]] (void) {
 	kprintf("=== Betriebssystem gestartet ===\n");
-	
+
 	init_uart();
 	irq_controller_init();
 	system_timer_init();

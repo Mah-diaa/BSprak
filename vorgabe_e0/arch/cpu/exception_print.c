@@ -64,9 +64,8 @@ void print_psr(unsigned int psr) {
 	int psr_t = (psr & PSR_T) != 0;
 
 	unsigned int mode = psr & PSR_MODE_MASK;
-	
 
-	kprintf("%c%c%c%c %c %c%c%c", 
+	kprintf("%c%c%c%c %c %c%c%c",
 		psr_n ? 'N' : '_',
 		psr_z ? 'Z' : '_',
 		psr_c ? 'C' : '_',
@@ -77,7 +76,7 @@ void print_psr(unsigned int psr) {
 		psr_t ? 'T' : '_'
 	);
 
-        char *right_aligned_mode_name =  get_mode_name(mode);
+	char *right_aligned_mode_name = get_mode_name(mode);
 	kprintf(" %s", right_aligned_mode_name);
 	kprintf(" 0x%08x", psr);
 }
@@ -85,44 +84,44 @@ mode_regs_t read_mode_specific_registers(void)
 {
 	mode_regs_t regs;
 	unsigned int original_cpsr;
-	
+
 	asm volatile("mrs %0, cpsr" : "=r" (original_cpsr));
-	
+
 	asm volatile("cpsid if"); //disable interrupts
-	
-    // "i" tells gcc to use a compile time constant, pretty neat
+
+	// "i" tells gcc to use a compile time constant, pretty neat
 	asm volatile("cps %0" : : "i" (PSR_SYS));
 	asm volatile("mov %0, sp" : "=r" (regs.user_sp));
 	asm volatile("mov %0, lr" : "=r" (regs.user_lr));
 	asm volatile("mrs %0, cpsr" : "=r" (regs.user_cpsr));
-	
-	//Read IRQ mode 
+
+	//Read IRQ mode
 	asm volatile("cps %0" : : "i" (PSR_IRQ));
 	asm volatile("mov %0, sp" : "=r" (regs.irq_sp));
 	asm volatile("mov %0, lr" : "=r" (regs.irq_lr));
 	asm volatile("mrs %0, spsr" : "=r" (regs.irq_spsr));
-	
+
 	//Read Abort mode
 	asm volatile("cps %0" : : "i" (PSR_ABT));
 	asm volatile("mov %0, sp" : "=r" (regs.abort_sp));
 	asm volatile("mov %0, lr" : "=r" (regs.abort_lr));
 	asm volatile("mrs %0, spsr" : "=r" (regs.abort_spsr));
-	
+
 	//Read Undefined mode
 	asm volatile("cps %0" : : "i" (PSR_UND));
 	asm volatile("mov %0, sp" : "=r" (regs.undefined_sp));
 	asm volatile("mov %0, lr" : "=r" (regs.undefined_lr));
 	asm volatile("mrs %0, spsr" : "=r" (regs.undefined_spsr));
-	
+
 	//Read Supervisor mode
 	asm volatile("cps %0" : : "i" (PSR_SVC));
 	asm volatile("mov %0, sp" : "=r" (regs.supervisor_sp));
 	asm volatile("mov %0, lr" : "=r" (regs.supervisor_lr));
 	asm volatile("mrs %0, spsr" : "=r" (regs.supervisor_spsr));
-	
+
 	//go back
 	asm volatile("msr cpsr_cxsf, %0" : : "r" (original_cpsr));
-	
+
 	return regs;
 }
 
@@ -163,6 +162,3 @@ void print_exception_infos(register_context_t* ctx, bool is_data_abort, bool is_
 	print_psr(mode_regs.supervisor_spsr);
 	kprintf("\n");
 }
-
-
-

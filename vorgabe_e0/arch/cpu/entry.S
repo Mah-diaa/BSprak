@@ -25,7 +25,7 @@ _setup_stacks:
 	cps #0x13
 	cpsie i
 	pop {lr}
-	bx lr		
+	bx lr
 
 _start:
 	mrs r0, cpsr
