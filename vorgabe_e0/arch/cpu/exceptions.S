@@ -36,12 +36,11 @@ _not_used: .word not_used_trampoline
 _irq: .word irq_trampoline
 _fiq: .word fiq_trampoline
 
-
-
 exception_trampoline supervisor_call_trampoline, 4
 exception_trampoline undefined_instruction_trampoline, 4
 exception_trampoline prefetch_abort_trampoline, 4
 exception_trampoline data_abort_trampoline, 8
 exception_trampoline not_used_trampoline, 0
+/*The offset here is only 4 because we count the last executed Instruction, NOT the interrupt causing one*/
 exception_trampoline irq_trampoline, 4
 exception_trampoline fiq_trampoline, 4

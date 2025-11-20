@@ -1,6 +1,7 @@
 #ifndef REGISTERS_H_
 #define REGISTERS_H_
 
+//SPSR first due to how we sace our regs in he exception_trampoline macro
 typedef struct register_context{
 	unsigned int spsr;
 	unsigned int r0;
