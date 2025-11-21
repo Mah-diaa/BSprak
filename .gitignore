@@ -1,2 +1,30 @@
 toolchain/
 
+# Build artifacts
+build/
+*.o
+*.d
+*.elf
+*.img
+Kernel
+
+# Generated files
+compile_commands.json
+
+# GDB scripts (development tools)
+gdb_*.gdb
+
+# Temporary files
+8000
+yellow_led.o
+
+# Submission archives
+*.tar.gz
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
