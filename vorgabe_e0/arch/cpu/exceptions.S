@@ -3,9 +3,9 @@
 .macro exception_trampoline handler_name, return_offset
 \handler_name:
 	.if \return_offset != 0
-	sub lr, lr, #\return_offset
+	sub lr, lr, #\return_offset @ For IRQ/FIQ: hardware sets LR = last completed + 8, but we need interrupted + 4
 	.endif
-	stmfd sp!, {r0-r12, lr}
+	stmfd sp!, {r0-r12, lr} @ Save LR pointing to continuation address
 	mrs r0, spsr
 	stmfd sp!, {r0}
 	mov r0, sp
@@ -36,11 +36,10 @@ _not_used: .word not_used_trampoline
 _irq: .word irq_trampoline
 _fiq: .word fiq_trampoline
 
-exception_trampoline supervisor_call_trampoline, 4
-exception_trampoline undefined_instruction_trampoline, 4
-exception_trampoline prefetch_abort_trampoline, 4
-exception_trampoline data_abort_trampoline, 8
+exception_trampoline supervisor_call_trampoline, 0 @ Hardware sets LR = triggering + 4
+exception_trampoline undefined_instruction_trampoline, 0
+exception_trampoline prefetch_abort_trampoline, 0
+exception_trampoline data_abort_trampoline, 0 @ Hardware sets LR = triggering + 8
 exception_trampoline not_used_trampoline, 0
-/*The offset here is only 4 because we count the last executed Instruction, NOT the interrupt causing one*/
-exception_trampoline irq_trampoline, 4
-exception_trampoline fiq_trampoline, 4
+exception_trampoline irq_trampoline, 4 @Hardware sets LR = last completed + 8, subtract 4 to get interrupted + 4
+exception_trampoline fiq_trampoline, 4 

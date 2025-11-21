@@ -148,6 +148,20 @@ void print_exception_infos(register_context_t* ctx, bool is_data_abort, bool is_
 	kprintf("R4: 0x%08x  R9: 0x%08x\n", ctx->r4, ctx->r9);
 
 	mode_regs_t mode_regs = read_mode_specific_registers();
+	
+	unsigned int current_cpsr;
+	asm volatile("mrs %0, cpsr" : "=r" (current_cpsr));
+	unsigned int current_mode = current_cpsr & PSR_MODE_MASK;
+	
+	if (current_mode == PSR_SVC) {
+		mode_regs.supervisor_lr = ctx->lr;
+	} else if (current_mode == PSR_IRQ) {
+		mode_regs.irq_lr = ctx->lr;
+	} else if (current_mode == PSR_ABT) {
+		mode_regs.abort_lr = ctx->lr;
+	} else if (current_mode == PSR_UND) {
+		mode_regs.undefined_lr = ctx->lr;
+	}
 
 	kprintf("\n>> Modusspezifische Register <<\n");
 	kprintf("User/System | LR: 0x%08x | SP: 0x%08x | CPSR: ", mode_regs.user_lr, mode_regs.user_sp);

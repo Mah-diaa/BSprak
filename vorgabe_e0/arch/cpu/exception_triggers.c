@@ -12,15 +12,12 @@ void do_undefined_inst(void)
 
 void do_data_abort(void)
 {
-	volatile unsigned int *invalid_addr = (volatile unsigned int *)0xFFFFFFFF;
-	volatile unsigned int value = *invalid_addr;
-	(void)value; // Suppress unused variable warning
+	volatile unsigned int *unaligned_addr = (volatile unsigned int *)0x00000001;
+	volatile unsigned int value = *unaligned_addr;
+	(void)value; // suppress unused variable warning
 }
 
 void do_prefetch_abort(void)
 {
-	asm volatile(
-		"ldr r0, =0xFFFFFFFF\n\t"
-		"mov pc, r0"
-	);
+	asm volatile("bkpt #0");
 }
