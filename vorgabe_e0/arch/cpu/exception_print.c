@@ -80,12 +80,16 @@ void print_psr(unsigned int psr) {
 	kprintf(" %s", right_aligned_mode_name);
 	kprintf(" 0x%08x", psr);
 }
-mode_regs_t read_mode_specific_registers(void)
+mode_regs_t read_mode_specific_registers(register_context_t* ctx)
 {
 	mode_regs_t regs;
 	unsigned int original_cpsr;
+	unsigned int current_cpsr;
+	unsigned int current_mode;
 
 	asm volatile("mrs %0, cpsr" : "=r" (original_cpsr));
+	asm volatile("mrs %0, cpsr" : "=r" (current_cpsr));
+	current_mode = current_cpsr & PSR_MODE_MASK;
 
 	asm volatile("cpsid if"); //disable interrupts
 
@@ -122,6 +126,26 @@ mode_regs_t read_mode_specific_registers(void)
 	//go back
 	asm volatile("msr cpsr_cxsf, %0" : : "r" (original_cpsr));
 
+	if (ctx) {
+		if (current_mode == PSR_SVC) {
+			regs.supervisor_lr = ctx->lr;
+			regs.supervisor_spsr = ctx->spsr;
+			regs.user_cpsr = current_cpsr;
+		} else if (current_mode == PSR_IRQ) {
+			regs.irq_lr = ctx->lr;
+			regs.irq_spsr = ctx->spsr;
+			regs.user_cpsr = current_cpsr;
+		} else if (current_mode == PSR_ABT) {
+			regs.abort_lr = ctx->lr;
+			regs.abort_spsr = ctx->spsr;
+			regs.user_cpsr = current_cpsr;
+		} else if (current_mode == PSR_UND) {
+			regs.undefined_lr = ctx->lr;
+			regs.undefined_spsr = ctx->spsr;
+			regs.user_cpsr = current_cpsr;
+		}
+	}
+
 	return regs;
 }
 
@@ -140,44 +164,25 @@ void print_exception_infos(register_context_t* ctx, bool is_data_abort, bool is_
 		kprintf("Instruction Fault Adress Register: 0x%08x\n", ctx->ifar);
 	}
 
-	kprintf(">> Registerschnappschuss <<\n");
-	kprintf("R0: 0x%08x R5: 0x%08x R10: 0x%08x\n", ctx->r0, ctx->r5, ctx->r10);
-	kprintf("R1: 0x%08x R6: 0x%08x R11: 0x%08x\n", ctx->r1, ctx->r6, ctx->r11);
-	kprintf("R2: 0x%08x R7: 0x%08x R12: 0x%08x\n", ctx->r2, ctx->r7, ctx->r12);
-	kprintf("R3: 0x%08x R8: 0x%08x\n", ctx->r3, ctx->r8);
-	kprintf("R4: 0x%08x R9: 0x%08x\n", ctx->r4, ctx->r9);
+	kprintf("\n>> Registerschnappschuss <<\n");
+	kprintf("R0: 0x%08x  R5: 0x%08x  R10: 0x%08x\n", ctx->r0, ctx->r5, ctx->r10);
+	kprintf("R1: 0x%08x  R6: 0x%08x  R11: 0x%08x\n", ctx->r1, ctx->r6, ctx->r11);
+	kprintf("R2: 0x%08x  R7: 0x%08x  R12: 0x%08x\n", ctx->r2, ctx->r7, ctx->r12);
+	kprintf("R3: 0x%08x  R8: 0x%08x\n", ctx->r3, ctx->r8);
+	kprintf("R4: 0x%08x  R9: 0x%08x\n", ctx->r4, ctx->r9);
 
-	mode_regs_t mode_regs = read_mode_specific_registers();
-	
-	unsigned int current_cpsr;
-	asm volatile("mrs %0, cpsr" : "=r" (current_cpsr));
-	unsigned int current_mode = current_cpsr & PSR_MODE_MASK;
-	
-	// Update the exception mode's LR and use saved SPSR to show where exception occurred
-	if (current_mode == PSR_SVC) {
-		mode_regs.supervisor_lr = ctx->lr;
-		mode_regs.supervisor_spsr = ctx->spsr;
-	} else if (current_mode == PSR_IRQ) {
-		mode_regs.irq_lr = ctx->lr;
-		mode_regs.irq_spsr = ctx->spsr;
-	} else if (current_mode == PSR_ABT) {
-		mode_regs.abort_lr = ctx->lr;
-		mode_regs.abort_spsr = ctx->spsr;
-	} else if (current_mode == PSR_UND) {
-		mode_regs.undefined_lr = ctx->lr;
-		mode_regs.undefined_spsr = ctx->spsr;
-	}
+	mode_regs_t mode_regs = read_mode_specific_registers(ctx);
 
-	kprintf(">> Modusspezifische Register <<\n");
+	kprintf("\n>> Modusspezifische Register <<\n");
 	kprintf("User/System | LR: 0x%08x | SP: 0x%08x | CPSR: ", mode_regs.user_lr, mode_regs.user_sp);
 	print_psr(mode_regs.user_cpsr);
-	kprintf("\nIRQ | LR: 0x%08x | SP: 0x%08x | SPSR: ", mode_regs.irq_lr, mode_regs.irq_sp);
+	kprintf("\nIRQ         | LR: 0x%08x | SP: 0x%08x | SPSR: ", mode_regs.irq_lr, mode_regs.irq_sp);
 	print_psr(mode_regs.irq_spsr);
-	kprintf("\nAbort | LR: 0x%08x | SP: 0x%08x | SPSR: ", mode_regs.abort_lr, mode_regs.abort_sp);
+	kprintf("\nAbort       | LR: 0x%08x | SP: 0x%08x | SPSR: ", mode_regs.abort_lr, mode_regs.abort_sp);
 	print_psr(mode_regs.abort_spsr);
-	kprintf("\nUndefined | LR: 0x%08x | SP: 0x%08x | SPSR: ", mode_regs.undefined_lr, mode_regs.undefined_sp);
+	kprintf("\nUndefined   | LR: 0x%08x | SP: 0x%08x | SPSR: ", mode_regs.undefined_lr, mode_regs.undefined_sp);
 	print_psr(mode_regs.undefined_spsr);
-	kprintf("\nSupervisor | LR: 0x%08x | SP: 0x%08x | SPSR: ", mode_regs.supervisor_lr, mode_regs.supervisor_sp);
+	kprintf("\nSupervisor  | LR: 0x%08x | SP: 0x%08x | SPSR: ", mode_regs.supervisor_lr, mode_regs.supervisor_sp);
 	print_psr(mode_regs.supervisor_spsr);
 	kprintf("\n");
 }
