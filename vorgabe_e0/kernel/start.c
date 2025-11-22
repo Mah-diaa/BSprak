@@ -13,14 +13,12 @@ bool irq_debug = false;
 
 void start_kernel [[noreturn]] (void) {
 	kprintf("=== Betriebssystem gestartet ===\n");
-
 	init_uart();
 	irq_controller_init();
 	system_timer_init();
 	test_kernel();
 	while(true) {
 		char c = uart_getc();
-		uart_putc(c); // Echo the character back
 		switch(c) {
 			case 'd':
 				irq_debug = !irq_debug;
