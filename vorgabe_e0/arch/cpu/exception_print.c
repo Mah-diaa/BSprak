@@ -153,14 +153,19 @@ void print_exception_infos(register_context_t* ctx, bool is_data_abort, bool is_
 	asm volatile("mrs %0, cpsr" : "=r" (current_cpsr));
 	unsigned int current_mode = current_cpsr & PSR_MODE_MASK;
 	
+	// Update the exception mode's LR and use saved SPSR to show where exception occurred
 	if (current_mode == PSR_SVC) {
 		mode_regs.supervisor_lr = ctx->lr;
+		mode_regs.supervisor_spsr = ctx->spsr;
 	} else if (current_mode == PSR_IRQ) {
 		mode_regs.irq_lr = ctx->lr;
+		mode_regs.irq_spsr = ctx->spsr;
 	} else if (current_mode == PSR_ABT) {
 		mode_regs.abort_lr = ctx->lr;
+		mode_regs.abort_spsr = ctx->spsr;
 	} else if (current_mode == PSR_UND) {
 		mode_regs.undefined_lr = ctx->lr;
+		mode_regs.undefined_spsr = ctx->spsr;
 	}
 
 	kprintf("\n>> Modusspezifische Register <<\n");
