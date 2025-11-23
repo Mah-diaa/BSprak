@@ -10,6 +10,7 @@ extern bool irq_debug;
 void handle_supervisor_call_trampoline(register_context_t* ctx)
 {
 	print_exception_infos(ctx, false, false, "Supervisor Call", ctx->lr - 4);
+	uart_putc('\4');
 	while (true) {
 	}
 }
@@ -17,6 +18,8 @@ void handle_supervisor_call_trampoline(register_context_t* ctx)
 void handle_undefined_instruction_trampoline(register_context_t* ctx)
 {
 	print_exception_infos(ctx, false, false, "Undefined Instruction", ctx->lr - 4);
+
+	uart_putc('\4');
 	while (true) {
 	}
 }
