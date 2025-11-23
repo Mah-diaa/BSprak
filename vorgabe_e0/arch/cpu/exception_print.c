@@ -157,21 +157,21 @@ void print_exception_infos(register_context_t* ctx, bool is_data_abort, bool is_
 		kprintf("Data Fault Status Register: 0x%08x -> %s\n", ctx->dfsr, dfsr_description);
 		kprintf("Data Fault Adress Register: 0x%08x\n", ctx->dfar);
 	}
-
+		
 	if(is_prefetch_abort) {
 		const char* ifsr_description = get_fsr_description(ctx->ifsr);
 		kprintf("Instruction Fault Status Register: 0x%08x -> %s\n", ctx->ifsr, ifsr_description);
 		kprintf("Instruction Fault Adress Register: 0x%08x\n", ctx->ifar);
 	}
-
+			
 	kprintf("\n>> Registerschnappschuss <<\n");
-	kprintf("R0: 0x%08x  R5: 0x%08x  R10: 0x%08x\n", ctx->r0, ctx->r5, ctx->r10);
+    kprintf("R0: 0x%08x  R5: 0x%08x  R10: 0x%08x\n", ctx->r0, ctx->r5, ctx->r10);
 	kprintf("R1: 0x%08x  R6: 0x%08x  R11: 0x%08x\n", ctx->r1, ctx->r6, ctx->r11);
 	kprintf("R2: 0x%08x  R7: 0x%08x  R12: 0x%08x\n", ctx->r2, ctx->r7, ctx->r12);
 	kprintf("R3: 0x%08x  R8: 0x%08x\n", ctx->r3, ctx->r8);
 	kprintf("R4: 0x%08x  R9: 0x%08x\n", ctx->r4, ctx->r9);
 
-	mode_regs_t mode_regs = read_mode_specific_registers(ctx);
+	struct mode_regs mode_regs = read_mode_specific_registers(ctx);
 
 	kprintf("\n>> Modusspezifische Register <<\n");
 	kprintf("User/System | LR: 0x%08x | SP: 0x%08x | CPSR: ", mode_regs.user_lr, mode_regs.user_sp);
@@ -184,5 +184,4 @@ void print_exception_infos(register_context_t* ctx, bool is_data_abort, bool is_
 	print_psr(mode_regs.undefined_spsr);
 	kprintf("\nSupervisor  | LR: 0x%08x | SP: 0x%08x | SPSR: ", mode_regs.supervisor_lr, mode_regs.supervisor_sp);
 	print_psr(mode_regs.supervisor_spsr);
-	kprintf("\n");
-}
+	kprintf("\n");}
