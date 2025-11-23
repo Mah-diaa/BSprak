@@ -135,8 +135,8 @@ void kprintf(const char *format, ...)
 
 			case 's':
 				char *str = va_arg(args, char *);
-				for (int i = 0; str[i]; i++) {
-					uart_putc(str[i]);
+				for (int j = 0; str[j]; j++) {
+					uart_putc(str[j]);
 				}
 				i++;
 				break;
