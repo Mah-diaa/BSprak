@@ -85,10 +85,11 @@ mode_regs_t read_mode_specific_registers(register_context_t* ctx)
 	mode_regs_t regs;
 	unsigned int original_cpsr;
 	unsigned int current_cpsr;
-	(void)ctx; // Suppress unused parameter warning
+	unsigned int current_mode;
 
 	asm volatile("mrs %0, cpsr" : "=r" (original_cpsr));
 	asm volatile("mrs %0, cpsr" : "=r" (current_cpsr));
+	current_mode = current_cpsr & PSR_MODE_MASK;
 
 	asm volatile("cpsid if"); //disable interrupts
 
@@ -125,28 +126,24 @@ mode_regs_t read_mode_specific_registers(register_context_t* ctx)
 	//go back
 	asm volatile("msr cpsr_cxsf, %0" : : "r" (original_cpsr));
 
-	// Commented out to see raw values
-	/*
+	// For the current exception mode, use ctx->spsr (saved at trampoline entry)
 	if (ctx) {
 		if (current_mode == PSR_SVC) {
 			regs.supervisor_lr = ctx->lr;
-			regs.supervisor_spsr = ctx->spsr;
-			regs.user_cpsr = current_cpsr;
+			regs.supervisor_spsr = ctx->spsr; 
 		} else if (current_mode == PSR_IRQ) {
 			regs.irq_lr = ctx->lr;
-			regs.irq_spsr = ctx->spsr;
-			regs.user_cpsr = current_cpsr;
+			regs.irq_spsr = ctx->spsr; 
 		} else if (current_mode == PSR_ABT) {
 			regs.abort_lr = ctx->lr;
-			regs.abort_spsr = ctx->spsr;
-			regs.user_cpsr = current_cpsr;
+			regs.abort_spsr = ctx->spsr; 
 		} else if (current_mode == PSR_UND) {
 			regs.undefined_lr = ctx->lr;
-			regs.undefined_spsr = ctx->spsr;
-			regs.user_cpsr = current_cpsr;
+			regs.undefined_spsr = ctx->spsr; 
 		}
+		// user_cpsr should shows what CPSR was before the exception
+		regs.user_cpsr = ctx->spsr;
 	}
-	*/
 
 	return regs;
 }
