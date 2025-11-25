@@ -85,11 +85,10 @@ mode_regs_t read_mode_specific_registers(register_context_t* ctx)
 	mode_regs_t regs;
 	unsigned int original_cpsr;
 	unsigned int current_cpsr;
-	unsigned int current_mode;
+	(void)ctx; // Suppress unused parameter warning
 
 	asm volatile("mrs %0, cpsr" : "=r" (original_cpsr));
 	asm volatile("mrs %0, cpsr" : "=r" (current_cpsr));
-	current_mode = current_cpsr & PSR_MODE_MASK;
 
 	asm volatile("cpsid if"); //disable interrupts
 
@@ -126,27 +125,28 @@ mode_regs_t read_mode_specific_registers(register_context_t* ctx)
 	//go back
 	asm volatile("msr cpsr_cxsf, %0" : : "r" (original_cpsr));
 
-	// For the current exception mode, use ctx->spsr which was saved at trampoline entry
-	// This is the SPSR that was set by hardware when the exception occurred
+	// Commented out to see raw values
+	/*
 	if (ctx) {
 		if (current_mode == PSR_SVC) {
 			regs.supervisor_lr = ctx->lr;
-			regs.supervisor_spsr = ctx->spsr; // Use SPSR from ctx (saved at trampoline entry)
-			regs.user_cpsr = ctx->spsr; // User CPSR is the SPSR (what CPSR was before exception)
+			regs.supervisor_spsr = ctx->spsr;
+			regs.user_cpsr = current_cpsr;
 		} else if (current_mode == PSR_IRQ) {
 			regs.irq_lr = ctx->lr;
-			regs.irq_spsr = ctx->spsr; // Use SPSR from ctx (saved at trampoline entry)
-			regs.user_cpsr = ctx->spsr; // User CPSR is the SPSR (what CPSR was before exception)
+			regs.irq_spsr = ctx->spsr;
+			regs.user_cpsr = current_cpsr;
 		} else if (current_mode == PSR_ABT) {
 			regs.abort_lr = ctx->lr;
-			regs.abort_spsr = ctx->spsr; // Use SPSR from ctx (saved at trampoline entry)
-			regs.user_cpsr = ctx->spsr; // User CPSR is the SPSR (what CPSR was before exception)
+			regs.abort_spsr = ctx->spsr;
+			regs.user_cpsr = current_cpsr;
 		} else if (current_mode == PSR_UND) {
 			regs.undefined_lr = ctx->lr;
-			regs.undefined_spsr = ctx->spsr; // Use SPSR from ctx (saved at trampoline entry)
-			regs.user_cpsr = ctx->spsr; // User CPSR is the SPSR (what CPSR was before exception)
+			regs.undefined_spsr = ctx->spsr;
+			regs.user_cpsr = current_cpsr;
 		}
 	}
+	*/
 
 	return regs;
 }
