@@ -126,23 +126,25 @@ mode_regs_t read_mode_specific_registers(register_context_t* ctx)
 	//go back
 	asm volatile("msr cpsr_cxsf, %0" : : "r" (original_cpsr));
 
+	// For the current exception mode, use ctx->spsr which was saved at trampoline entry
+	// This is the SPSR that was set by hardware when the exception occurred
 	if (ctx) {
 		if (current_mode == PSR_SVC) {
 			regs.supervisor_lr = ctx->lr;
-			regs.supervisor_spsr = ctx->spsr;
-			regs.user_cpsr = current_cpsr;
+			regs.supervisor_spsr = ctx->spsr; // Use SPSR from ctx (saved at trampoline entry)
+			regs.user_cpsr = ctx->spsr; // User CPSR is the SPSR (what CPSR was before exception)
 		} else if (current_mode == PSR_IRQ) {
 			regs.irq_lr = ctx->lr;
-			regs.irq_spsr = ctx->spsr;
-			regs.user_cpsr = current_cpsr;
+			regs.irq_spsr = ctx->spsr; // Use SPSR from ctx (saved at trampoline entry)
+			regs.user_cpsr = ctx->spsr; // User CPSR is the SPSR (what CPSR was before exception)
 		} else if (current_mode == PSR_ABT) {
 			regs.abort_lr = ctx->lr;
-			regs.abort_spsr = ctx->spsr;
-			regs.user_cpsr = current_cpsr;
+			regs.abort_spsr = ctx->spsr; // Use SPSR from ctx (saved at trampoline entry)
+			regs.user_cpsr = ctx->spsr; // User CPSR is the SPSR (what CPSR was before exception)
 		} else if (current_mode == PSR_UND) {
 			regs.undefined_lr = ctx->lr;
-			regs.undefined_spsr = ctx->spsr;
-			regs.user_cpsr = current_cpsr;
+			regs.undefined_spsr = ctx->spsr; // Use SPSR from ctx (saved at trampoline entry)
+			regs.user_cpsr = ctx->spsr; // User CPSR is the SPSR (what CPSR was before exception)
 		}
 	}
 
