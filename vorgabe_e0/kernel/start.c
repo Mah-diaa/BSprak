@@ -12,13 +12,15 @@ static void subprogram [[noreturn]] (void);
 bool irq_debug = false;
 
 void start_kernel [[noreturn]] (void) {
-	kprintf("=== Betriebssystem gestartet ===\n");
 	init_uart();
 	irq_controller_init();
 	system_timer_init();
+	kprintf("=== Betriebssystem gestartet ===\n");
 	test_kernel();
+
 	while(true) {
 		char c = uart_getc();
+		uart_putc(c);
 		switch(c) {
 			case 'd':
 				irq_debug = !irq_debug;

@@ -31,11 +31,11 @@ void init_uart(){
 	uart_instance->CR |= 3 << 8; //enable txd and rxd
 	uart_instance->CR |= 1 << 0;//enable uart
 
+	// Clear RX interrupts before enabling
+	uart_instance->ICR = (1 << 4);
+
 	// Enable RX interrupt
 	uart_instance->IMSC = (1 << 4);
-
-	// Clear RX interrupts
-	uart_instance->ICR = (1 << 4);
 }
 
 void uart_putc(char c) {
