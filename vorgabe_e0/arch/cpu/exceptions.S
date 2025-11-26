@@ -11,7 +11,7 @@
 	mov r0, sp
 	bl handle_\handler_name
 	ldmfd sp!, {r0}
-	msr spsr, r0
+	msr spsr_cxsf, r0
 	ldmfd sp!, {r0-r12, lr}
 	movs pc, lr
 .endm

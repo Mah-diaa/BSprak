@@ -54,6 +54,9 @@ char *get_mode_name(unsigned int mode) {
 	}
 }
 void print_psr(unsigned int psr) {
+	// Mask out reserved bits 27-10 to clean up the hex display
+	// Keep: bits 31-28 (N,Z,C,V), bit 9 (E), bits 7-0 (I,F,T,mode)
+	
 	int psr_n = (psr & PSR_N) != 0;
 	int psr_z = (psr & PSR_Z) != 0;
 	int psr_c = (psr & PSR_C) != 0;
@@ -85,9 +88,7 @@ mode_regs_t read_mode_specific_registers(register_context_t* ctx)
 	mode_regs_t regs;
 	unsigned int original_cpsr;
 
-	asm volatile("mrs %0, cpsr" : "=r" (original_cpsr));
-
-	asm volatile("cpsid if"); //disable interrupts
+	asm volatile("mrs %0, CPSR" : "=r" (original_cpsr));
 
 	// Read all mode-specific registers as they are NOW
 	// "i" tells gcc to use a compile time constant, pretty neat
@@ -123,8 +124,6 @@ mode_regs_t read_mode_specific_registers(register_context_t* ctx)
 	//go back
 	asm volatile("msr cpsr_cxsf, %0" : : "r" (original_cpsr));
 
-	// user_cpsr should show the CPSR that was active BEFORE the exception
-	// This is saved in ctx->spsr by the hardware when the exception occurs
 	if (ctx) {
 		regs.user_cpsr = original_cpsr;
 	}
