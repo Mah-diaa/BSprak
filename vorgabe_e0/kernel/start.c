@@ -20,7 +20,6 @@ void start_kernel [[noreturn]] (void) {
 
 	while(true) {
 		char c = uart_getc();
-		uart_putc(c);
 		switch(c) {
 			case 'd':
 				irq_debug = !irq_debug;
