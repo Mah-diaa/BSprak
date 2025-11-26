@@ -54,8 +54,6 @@ char *get_mode_name(unsigned int mode) {
 	}
 }
 void print_psr(unsigned int psr) {
-	// Mask out reserved bits 27-10 to clean up the hex display
-	// Keep: bits 31-28 (N,Z,C,V), bit 9 (E), bits 7-0 (I,F,T,mode)
 	
 	int psr_n = (psr & PSR_N) != 0;
 	int psr_z = (psr & PSR_Z) != 0;
@@ -79,8 +77,24 @@ void print_psr(unsigned int psr) {
 		psr_t ? 'T' : '_'
 	);
 
-	char *right_aligned_mode_name = get_mode_name(mode);
-	kprintf(" %s", right_aligned_mode_name);
+	kprintf(" ");
+	char *mode_name = get_mode_name(mode);
+	const int max_width = 10; // "Supervisor" is the longest at 10 chars
+	
+	// Calculate length of mode name
+	int name_len = 0;
+	while (mode_name[name_len] != '\0') {
+		name_len++;
+	}
+	
+	// Print padding spaces for right alignment
+	int padding = max_width - name_len;
+	for (int i = 0; i < padding; i++) {
+		kprintf(" ");
+	}
+	
+	// Print the mode name
+	kprintf("%s", mode_name);
 	kprintf(" 0x%08x", psr);
 }
 mode_regs_t read_mode_specific_registers(register_context_t* ctx)
