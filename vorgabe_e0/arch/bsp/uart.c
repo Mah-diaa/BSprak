@@ -23,8 +23,8 @@ void init_uart(){
 			     (ALT_FUNC_0 << RXD_SHIFT);
 	//set the FIFO
 	uart_instance->LCRH = 0;
-	uart_instance->LCRH |= 1 << 4;  // Enable FIFO
-	uart_instance->LCRH |= 0 << 5;  // Change: Set trigger to 1/8 full (1 char) instead of 3/4
+	uart_instance->LCRH |= 1 << 4;
+	uart_instance->LCRH |= 3 << 5;
 
 	//set CR bits as per page 185
 	uart_instance->CR = 0; //disable uart
@@ -36,13 +36,6 @@ void init_uart(){
 
 	// Enable RX interrupt
 	uart_instance->IMSC = (1 << 4);
-	
-	// NEW: Check for characters already in FIFO (from early input)
-	// Read any characters that arrived before interrupts were enabled
-	while (!(uart_instance->FR & (1 << 4))) {  // While RX FIFO is not empty (bit 4 = RXFE)
-		char c = uart_instance->DR & 0xFF;
-		buff_putc(uart_buffer, c);
-	}
 }
 
 void uart_putc(char c) {
