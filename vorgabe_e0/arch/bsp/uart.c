@@ -22,12 +22,19 @@ void init_uart(){
 	gpio_port->func[1] = (gpio_port->func[1] & ~(GPF_MASK << RXD_SHIFT)) |
 			     (ALT_FUNC_0 << RXD_SHIFT);
 	
+	// Set baud rate (115200 @ 48MHz UART clock)
+	// IBRD = 48MHz / (16 * 115200) = 26.0417 -> 26
+	// FBRD = 0.0417 * 64 = 2.666 -> 3
+	uart_instance->IBRD = 26;
+	uart_instance->FBRD = 3;
+
 	//set the FIFO
 	uart_instance->LCRH = 0;
 	uart_instance->LCRH |= 1 << 4; // Enable FIFO (FEN)
 	uart_instance->LCRH |= 3 << 5; // 8-bit word length (WLEN)
 
 	// Set RX FIFO trigger level to 1/8 full (000 in bits 5:3)
+	// This will trigger timeout interrupt for single chars
 	uart_instance->IFLS = 0;
 	
 	//set CR bits as per page 185
@@ -35,17 +42,19 @@ void init_uart(){
 	uart_instance->CR |= 3 << 8; //enable txd and rxd
 	uart_instance->CR |= 1 << 0;//enable uart
 
-	// Clear RX interrupts before enabling
-	uart_instance->ICR = (1 << 4);
+	// Clear RX and RX timeout interrupts before enabling
+	uart_instance->ICR = (1 << 4) | (1 << 6);
 
-	// Enable RX interrupt
-	uart_instance->IMSC = (1 << 4);
+	// Enable RX interrupt and RX timeout interrupt
+	uart_instance->IMSC = (1 << 4) | (1 << 6);
 
 	// Drain any characters that arrived early
 	while (!(uart_instance->FR & (1 << 4))) {  // While RX FIFO not empty
 		char c = uart_instance->DR & 0xFF;
 		buff_putc(uart_buffer, c);
 	}
+	// Clear any pending interrupts
+	uart_instance->ICR = (1 << 4) | (1 << 6);
 }
 
 void uart_putc(char c) {
@@ -59,10 +68,15 @@ char uart_getc(void) {
 }
 
 void uart_rx_interrupt_handler(void) {
-    while (uart_instance->MIS & (1 << 4)) {
-        char c = uart_instance->DR & 0xFF;
-        buff_putc(uart_buffer, c);
-        uart_instance->ICR |= (1 << 4);
+    // Check for RX interrupt (FIFO level) or RX timeout interrupt
+    if (uart_instance->MIS & ((1 << 4) | (1 << 6))) {
+        // Drain all available characters from FIFO
+        while (!(uart_instance->FR & (1 << 4))) {  // While RX FIFO not empty
+            char c = uart_instance->DR & 0xFF;
+            buff_putc(uart_buffer, c);
+        }
+        // Clear both RX and RX timeout interrupts
+        uart_instance->ICR = (1 << 4) | (1 << 6);
     }
 }
 
