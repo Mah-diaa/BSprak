@@ -21,11 +21,12 @@ void init_uart(){
 
 	gpio_port->func[1] = (gpio_port->func[1] & ~(GPF_MASK << RXD_SHIFT)) |
 			     (ALT_FUNC_0 << RXD_SHIFT);
+	
 	//set the FIFO
 	uart_instance->LCRH = 0;
-	uart_instance->LCRH |= 1 << 4;
-	uart_instance->LCRH |= 3 << 5;
-
+	uart_instance->LCRH |= 0 << 4;
+	//uart_instance->LCRH |= 3 << 5;
+	
 	//set CR bits as per page 185
 	uart_instance->CR = 0; //disable uart
 	uart_instance->CR |= 3 << 8; //enable txd and rxd
@@ -35,7 +36,7 @@ void init_uart(){
 	uart_instance->ICR = (1 << 4);
 
 	// Enable RX interrupt
-	uart_instance->IMSC = (1 << 4);
+	uart_instance->IMSC = (1 << 4);	
 }
 
 void uart_putc(char c) {
@@ -51,8 +52,7 @@ char uart_getc(void) {
 void uart_rx_interrupt_handler(void) {
     if (uart_instance->MIS & (1 << 4)) {
         char c = uart_instance->DR & 0xFF;
-        if (buff_putc(uart_buffer, c)) {
-        }
+        buff_putc(uart_buffer, c);
         uart_instance->ICR |= (1 << 4);
     }
 }
