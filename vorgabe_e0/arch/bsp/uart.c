@@ -24,8 +24,8 @@ void init_uart(){
 	
 	//set the FIFO
 	uart_instance->LCRH = 0;
-	uart_instance->LCRH |= 0 << 4;
-	//uart_instance->LCRH |= 3 << 5;
+	uart_instance->LCRH |= 1 << 4;
+	uart_instance->LCRH |= 0 << 5;
 	
 	//set CR bits as per page 185
 	uart_instance->CR = 0; //disable uart
