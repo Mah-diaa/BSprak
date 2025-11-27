@@ -1,3 +1,27 @@
-build
-*.pdf
+# Build artifacts
+build/
+*.o
+*.d
+kernel.img
+kernel.bin
+kernel.elf
+kernel_dump.s
+Kernel
+
+# Submission archives
+*.tar.gz
 *.gz
+
+# Documentation (generated)
+*.pdf
+
+# IDE and development files
+compile_commands.json
+*.gdb
+.gdb_history
+
+# Temporary files
+*~
+*.swp
+*.swo
+.DS_Store
