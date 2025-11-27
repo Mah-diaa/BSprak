@@ -68,10 +68,15 @@ char uart_getc(void) {
 }
 
 void uart_rx_interrupt_handler(void) {
-    while (uart_instance->MIS & (1 << 4)) {
-        char c = uart_instance->DR & 0xFF;
-        buff_putc(uart_buffer, c);
-        uart_instance->ICR |= (1 << 4);
+    // Check for RX interrupt (FIFO level) or RX timeout interrupt
+    if (uart_instance->MIS & ((1 << 4) | (1 << 6))) {
+        // Drain all available characters from FIFO
+        while (!(uart_instance->FR & (1 << 4))) {  // While RX FIFO not empty
+            char c = uart_instance->DR & 0xFF;
+            buff_putc(uart_buffer, c);
+        }
+        // Clear both RX and RX timeout interrupts
+        uart_instance->ICR = (1 << 4) | (1 << 6);
     }
 }
 
