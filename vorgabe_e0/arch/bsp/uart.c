@@ -24,8 +24,12 @@ void init_uart(){
 	
 	//set the FIFO
 	uart_instance->LCRH = 0;
-	uart_instance->LCRH |= 1 << 4;
-	uart_instance->LCRH |= 0 << 5;
+	uart_instance->LCRH |= 1 << 4; // Enable FIFO (FEN)
+	uart_instance->LCRH |= 3 << 5; // 8-bit word length (WLEN)
+
+	// Set RX FIFO trigger level to 1/8 full (000 in bits 5:3)
+	uart_instance->IFLS &= ~(7 << 3);
+	uart_instance->IFLS |= (0 << 3);
 	
 	//set CR bits as per page 185
 	uart_instance->CR = 0; //disable uart
@@ -36,7 +40,13 @@ void init_uart(){
 	uart_instance->ICR = (1 << 4);
 
 	// Enable RX interrupt
-	uart_instance->IMSC = (1 << 4);	
+	uart_instance->IMSC = (1 << 4);
+
+	// Drain any characters that arrived early
+	while (!(uart_instance->FR & (1 << 4))) {  // While RX FIFO not empty
+		char c = uart_instance->DR & 0xFF;
+		buff_putc(uart_buffer, c);
+	}
 }
 
 void uart_putc(char c) {
@@ -50,11 +60,16 @@ char uart_getc(void) {
 }
 
 void uart_rx_interrupt_handler(void) {
-    if (uart_instance->MIS & (1 << 4)) {
-        char c = uart_instance->DR & 0xFF;
-        buff_putc(uart_buffer, c);
-        uart_instance->ICR |= (1 << 4);
-    }
+	// Loop to read ALL characters from FIFO while interrupt is pending
+	while (uart_instance->MIS & (1 << 4)) {
+		char c = uart_instance->DR & 0xFF;
+		// Echo immediately so user sees input
+		uart_putc(c);
+		// Store in buffer
+		buff_putc(uart_buffer, c);
+		// Clear interrupt
+		uart_instance->ICR |= (1 << 4);
+	}
 }
 
 void uart_loopback [[noreturn]] (void) {

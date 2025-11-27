@@ -13,7 +13,7 @@ struct uart {
 	unsigned int unused2[4];
 	unsigned int LCRH;
 	unsigned int CR;
-	unsigned int unused3;
+	unsigned int IFLS;
 	unsigned int IMSC;
 	unsigned int RIS;
 	unsigned int MIS;
@@ -25,6 +25,7 @@ static_assert(offsetof(struct uart, RSRECR) == 0x4);
 static_assert(offsetof(struct uart, FR) == 0x18);
 static_assert(offsetof(struct uart, LCRH) == 0x2c);
 static_assert(offsetof(struct uart, CR) == 0x30);
+static_assert(offsetof(struct uart, IFLS) == 0x34);
 static_assert(offsetof(struct uart, IMSC) == 0x38);
 static_assert(offsetof(struct uart, RIS) == 0x3C);
 static_assert(offsetof(struct uart, MIS) == 0x40);
