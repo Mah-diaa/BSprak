@@ -2,9 +2,7 @@
 
 void do_supervisor_call(void)
 {
-	// For testing - SVC from supervisor mode may not trap
-	// Let's try an undefined instruction instead
-	asm volatile(".word 0xE7FFFFFF");
+	asm volatile("svc #0");
 }
 
 void do_undefined_inst(void)
