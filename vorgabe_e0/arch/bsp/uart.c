@@ -22,11 +22,6 @@ void init_uart(){
 	gpio_port->func[1] = (gpio_port->func[1] & ~(GPF_MASK << RXD_SHIFT)) |
 			     (ALT_FUNC_0 << RXD_SHIFT);
 	
-	//Set baud rate to these values to prevent transmission problems in tests
-	//experimented to get the values ~M
-	uart_instance->IBRD = 26;
-	uart_instance->FBRD = 3;
-
 	//set the FIFO
 	uart_instance->LCRH = 0;
 	uart_instance->LCRH |= 1 << 4; // Enable FIFO (FEN)
