@@ -10,8 +10,6 @@
 #include <lib/regcheck.h>
 #include <stdbool.h>
 
-static void subprogram [[noreturn]] (void);
-
 bool irq_debug = false;
 
 void start_kernel [[noreturn]] (void) {
@@ -32,13 +30,3 @@ void start_kernel [[noreturn]] (void) {
 	}
 }
 
-static void subprogram [[noreturn]] (void) {
-	while(true) {
-		char c = uart_getc();
-		for(unsigned int n = 0; n < PRINT_COUNT; n++) {
-			uart_putc(c);
-			volatile unsigned int i = 0;
-			for(; i < BUSY_WAIT_COUNTER; i++) {}
-		}
-	}
-}
