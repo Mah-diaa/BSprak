@@ -49,7 +49,6 @@ void init_uart(){
 		char c = uart_instance->DR & 0xFF;
 		buff_putc(uart_buffer, c);
 	}
-	// Clear any pending interrupts
 
 	uart_instance->ICR = (1 << 4) | (1 << 6);
 }
@@ -71,9 +70,6 @@ void uart_rx_interrupt_handler(void) {
     if (uart_instance->MIS & ((1 << 4) | (1 << 6))) {
         while (!(uart_instance->FR & (1 << 4))) {  // Read ALL characters from FIFO
             char c = uart_instance->DR & 0xFF;
-
-            // Handle special characters directly (S, P, A, U trigger exceptions)
-            // Other characters create threads
             switch(c) {
                 case 'd':
                     irq_debug = !irq_debug;

@@ -17,9 +17,9 @@ void start_kernel [[noreturn]] (void) {
 	irq_controller_init();
 	system_timer_init();
 	threads_init();
-	scheduler_enable();
 	kprintf("=== Betriebssystem gestartet ===\n");
 	test_kernel();
+	scheduler_enable();
 	while(true) {
 	}
 }
