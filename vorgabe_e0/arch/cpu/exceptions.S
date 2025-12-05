@@ -42,4 +42,18 @@ exception_trampoline prefetch_abort_trampoline, 0
 exception_trampoline data_abort_trampoline, 0 @ Hardware sets LR = triggering + 8
 exception_trampoline not_used_trampoline, 0
 exception_trampoline irq_trampoline, 4 @Hardware sets LR = last completed + 8, subtract 4 to get interrupted + 4
-exception_trampoline fiq_trampoline, 4 
+exception_trampoline fiq_trampoline, 4
+
+// System call to exit current thread
+.section .text
+.global syscall_exit
+syscall_exit:
+	mov r0, #1      @ Set r0=1 to indicate thread exit
+	svc #0          @ Trigger supervisor call
+	@ Should never return - scheduler switches to another thread
+
+// Idle thread - runs when no other threads are ready
+.global idle_thread
+idle_thread:
+	nop             @ Do nothing
+	b idle_thread   @ Loop forever 

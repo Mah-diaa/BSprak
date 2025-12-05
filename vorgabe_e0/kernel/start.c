@@ -4,6 +4,9 @@
 #include <arch/bsp/timer.h>
 #include <arch/bsp/irq_controller.h>
 #include <arch/cpu/exception_triggers.h>
+#include <arch/cpu/scheduler.h>
+#include <kernel/threads.h>
+#include <user/main.h>
 #include <lib/regcheck.h>
 #include <stdbool.h>
 
@@ -15,36 +18,17 @@ void start_kernel [[noreturn]] (void) {
 	init_uart();
 	irq_controller_init();
 	system_timer_init();
+	threads_init();
+
 	kprintf("=== Betriebssystem gestartet ===\n");
 	test_kernel();
 
+	// Enable scheduler - threads will be created by UART interrupt handler
+	scheduler_enable();
+
+	// Idle loop - does nothing, all work happens in interrupt handlers and user threads
 	while(true) {
-		char c = uart_getc();
-		switch(c) {
-			case 'd':
-				irq_debug = !irq_debug;
-				break;
-			case 'a':
-				do_data_abort();
-				break;
-			case 'p':
-				do_prefetch_abort();
-				break;
-			case 's':
-				do_supervisor_call();
-				break;
-			case 'u':
-				do_undefined_inst();
-				break;
-			case 'c':
-				register_checker();
-				break;
-			case 'e':
-				subprogram();
-			default:
-				kprintf("Unknown input: %c\n", c);
-				break;
-		}
+		// Idle - waiting for interrupts
 	}
 }
 

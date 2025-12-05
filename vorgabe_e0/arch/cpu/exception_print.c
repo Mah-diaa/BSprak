@@ -145,19 +145,19 @@ mode_regs_t read_mode_specific_registers(register_context_t* ctx)
 	return regs;
 }
 
-void print_exception_infos(register_context_t* ctx, bool is_data_abort, bool is_prefetch_abort, char* exception_name, unsigned int exception_source_addr) {
+void print_exception_infos(register_context_t* ctx, bool is_data_abort, bool is_prefetch_abort, char* exception_name, unsigned int exception_source_addr, unsigned int dfsr, unsigned int dfar, unsigned int ifsr, unsigned int ifar) {
 	kprintf("############ EXCEPTION ############\n");
 	kprintf("%s an Adresse: 0x%08x\n", exception_name, exception_source_addr);
 	if(is_data_abort) {
-		const char* dfsr_description = get_fsr_description(ctx->dfsr);
-		kprintf("Data Fault Status Register: 0x%08x -> %s\n", ctx->dfsr, dfsr_description);
-		kprintf("Data Fault Adress Register: 0x%08x\n", ctx->dfar);
+		const char* dfsr_description = get_fsr_description(dfsr);
+		kprintf("Data Fault Status Register: 0x%08x -> %s\n", dfsr, dfsr_description);
+		kprintf("Data Fault Adress Register: 0x%08x\n", dfar);
 	}
-		
+
 	if(is_prefetch_abort) {
-		const char* ifsr_description = get_fsr_description(ctx->ifsr);
-		kprintf("Instruction Fault Status Register: 0x%08x -> %s\n", ctx->ifsr, ifsr_description);
-		kprintf("Instruction Fault Adress Register: 0x%08x\n", ctx->ifar);
+		const char* ifsr_description = get_fsr_description(ifsr);
+		kprintf("Instruction Fault Status Register: 0x%08x -> %s\n", ifsr, ifsr_description);
+		kprintf("Instruction Fault Adress Register: 0x%08x\n", ifar);
 	}
 			
 	kprintf("\n>> Registerschnappschuss <<\n");

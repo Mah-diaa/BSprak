@@ -10,7 +10,7 @@ char *get_mode_name(unsigned int mode);
 
 mode_regs_t read_mode_specific_registers(register_context_t* ctx);
 
-void print_exception_infos(register_context_t* ctx, bool is_data_abort, bool is_prefetch_abort, char* exception_name, unsigned int exception_source_addr);
+void print_exception_infos(register_context_t* ctx, bool is_data_abort, bool is_prefetch_abort, char* exception_name, unsigned int exception_source_addr, unsigned int dfsr, unsigned int dfar, unsigned int ifsr, unsigned int ifar);
 
 #endif // EXCEPTION_PRINT_H_
 

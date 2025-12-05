@@ -28,7 +28,10 @@ static volatile struct irq_controller *const irq_controller_instance =
 
 #define TIMER_INTERRUPT_MASK (1 << 1)
 #define UART_INTERRUPT_MASK (1 << 25)
+
+struct register_context;  // Forward declaration
+
 void irq_controller_init(void);
-void irq_controller_handler(void);
+void irq_controller_handler(struct register_context *ctx);
 
 #endif // IRQ_CONTROLLER_H_

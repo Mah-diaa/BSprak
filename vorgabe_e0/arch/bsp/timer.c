@@ -1,3 +1,4 @@
+#include <arch/bsp/uart.h>
 #include <arch/bsp/timer.h>
 #include <lib/kprintf.h>
 #include <config.h>
@@ -19,5 +20,5 @@ void system_timer_interrupt_handler(void) {
 	timer_instance->C1 = new_c1;
 	timer_instance->CS |= TIMER_STATUS_1;
 
-	kprintf("!\n");
+	kprintf("!");
 }

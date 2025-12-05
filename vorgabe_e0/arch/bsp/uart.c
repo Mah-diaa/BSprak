@@ -3,6 +3,10 @@
 #include <config.h>
 #include <stddef.h>
 #include <assert.h>
+#include <arch/cpu/exception_triggers.h>
+#include <kernel/threads.h>
+#include <user/main.h>
+#include <stdbool.h>
 
 static const unsigned int UART_BASE = 0x7E201000 - 0x3F000000;
 static const unsigned int TXD = 14u % 10;
@@ -60,12 +64,37 @@ char uart_getc(void) {
     return buff_getc(uart_buffer);
 }
 
+extern bool irq_debug;
+
 void uart_rx_interrupt_handler(void) {
     // Check for RX interrupt
     if (uart_instance->MIS & ((1 << 4) | (1 << 6))) {
-        while (!(uart_instance->FR & (1 << 4))) {  //This has to be a while to read ALL ~M
+        while (!(uart_instance->FR & (1 << 4))) {  // Read ALL characters from FIFO
             char c = uart_instance->DR & 0xFF;
-            buff_putc(uart_buffer, c);
+
+            // Handle special characters directly (S, P, A, U trigger exceptions)
+            // Other characters create threads
+            switch(c) {
+                case 'd':
+                    irq_debug = !irq_debug;
+                    break;
+                case 'S':
+                    do_supervisor_call();
+                    break;
+                case 'P':
+                    do_prefetch_abort();
+                    break;
+                case 'A':
+                    do_data_abort();
+                    break;
+                case 'U':
+                    do_undefined_inst();
+                    break;
+               default:
+                    // Create thread for all other characters
+                    scheduler_thread_create(main, &c, sizeof(char));
+                    break;
+            }
         }
         // Clear both RX and RX timeout interrupts
         uart_instance->ICR = (1 << 4) | (1 << 6);

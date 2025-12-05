@@ -1,7 +1,13 @@
 #ifndef REGISTERS_H_
 #define REGISTERS_H_
 
-//SPSR first due to how we sace our regs in he exception_trampoline macro
+//SPSR first due to how we save our regs in the exception_trampoline macro
+// This structure MUST match exactly what the exception trampoline saves on the stack:
+// - SPSR (1 word)
+// - r0-r12 (13 words)
+// - lr (1 word)
+// Total: 15 words = 60 bytes
+// Any extra fields cause stack corruption during context switching!
 typedef struct register_context{
 	unsigned int spsr;
 	unsigned int r0;
@@ -18,17 +24,6 @@ typedef struct register_context{
 	unsigned int r11;
 	unsigned int r12;
 	unsigned int lr;
-
-	unsigned int pc;
-
-	unsigned int sp;
-
-	unsigned int cpsr;
-
-	unsigned int dfsr;
-	unsigned int dfar;
-	unsigned int ifsr;
-	unsigned int ifar;
 }register_context_t;
 
 typedef struct mode_regs {

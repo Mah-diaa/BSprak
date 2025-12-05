@@ -35,4 +35,11 @@ SECTIONS
 	. = 0xFE000;
 	_system_stack_end = .;
 	_system_stack_start = . - 0x800;
+
+	/* Thread stacks: 32 threads × 2 KiB (0x800) each = 64 KiB (0x10000) total */
+	/* Thread stacks region: 0xFD800 - 0xED800 */
+	. = 0xFD800;
+	_thread_stacks_end = .;          /* Top of thread stack region (highest address) */
+	. = . - (32 * 0x800);            /* Allocate 32 × 2 KiB = 64 KiB */
+	_thread_stacks_start = .;        /* Bottom of thread stack region (lowest address) */
 }
