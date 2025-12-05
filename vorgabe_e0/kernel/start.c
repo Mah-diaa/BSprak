@@ -17,16 +17,10 @@ void start_kernel [[noreturn]] (void) {
 	irq_controller_init();
 	system_timer_init();
 	threads_init();
-
+	scheduler_enable();
 	kprintf("=== Betriebssystem gestartet ===\n");
 	test_kernel();
-
-	// Enable scheduler - threads will be created by UART interrupt handler
-	scheduler_enable();
-
-	// Idle loop - does nothing, all work happens in interrupt handlers and user threads
 	while(true) {
-		// Idle - waiting for interrupts
 	}
 }
 
