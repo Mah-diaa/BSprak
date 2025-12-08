@@ -10,12 +10,10 @@ extern bool irq_debug;
 //the subtraction of 4 or 8 is necessary because of the way the exception trampolines are set up
 void handle_supervisor_call_trampoline(register_context_t* ctx)
 {
-	// r0 == 1 means thread exit (set by syscall_exit)
-	// Only print exception info if it's NOT a normal thread exit
 	if (ctx->r0 != 1) {
 		print_exception_infos(ctx, false, false, "Supervisor Call", ctx->lr - 4, 0, 0, 0, 0);
 	}
-	// End current thread and reschedule
+	// If in user mode (0b10000), kill the thread; otherwise hang
 	if ((ctx->spsr & 0x1F) == 0x10) {
 		scheduler_end_current_thread(ctx);
 	} else {
@@ -29,7 +27,6 @@ void handle_supervisor_call_trampoline(register_context_t* ctx)
 void handle_undefined_instruction_trampoline(register_context_t* ctx)
 {
 	print_exception_infos(ctx, false, false, "Undefined Instruction", ctx->lr - 4, 0, 0, 0, 0);
-	// If in user mode (0b10000), kill the thread; otherwise hang
 	if ((ctx->spsr & 0x1F) == 0x10) {
 		scheduler_end_current_thread(ctx);
 	} else {
@@ -60,7 +57,6 @@ void handle_data_abort_trampoline(register_context_t* ctx)
 	asm volatile("mrc p15, 0, %0, c5, c0, 0" : "=r" (dfsr));
 	asm volatile("mrc p15, 0, %0, c6, c0, 0" : "=r" (dfar));
 	print_exception_infos(ctx, true, false, "Data Abort", ctx->lr - 8, dfsr, dfar, 0, 0);
-	// If in user mode, kill the thread; otherwise hang
 	if ((ctx->spsr & 0x1F) == 0x10) {
 		scheduler_end_current_thread(ctx);
 	} else {

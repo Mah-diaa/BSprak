@@ -65,6 +65,7 @@ char uart_getc(void) {
 
 extern bool irq_debug;
 
+//adding the handling for the Kernel crashing here
 void uart_rx_interrupt_handler(void) {
     // Check for RX interrupt
     if (uart_instance->MIS & ((1 << 4) | (1 << 6))) {
@@ -92,7 +93,6 @@ void uart_rx_interrupt_handler(void) {
                     break;
             }
         }
-        // Clear both RX and RX timeout interrupts
         uart_instance->ICR = (1 << 4) | (1 << 6);
     }
 }
