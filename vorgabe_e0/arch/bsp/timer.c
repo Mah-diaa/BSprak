@@ -7,7 +7,6 @@
 extern bool irq_debug;
 
 void system_timer_init(void) {
-	// Clear timer interrupt status bit
 	timer_instance->CS |= TIMER_STATUS_1;
 	unsigned int counter = timer_instance->CLO;
 	timer_instance->C1 = counter + TIMER_INTERVAL;

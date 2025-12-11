@@ -67,9 +67,8 @@ extern bool irq_debug;
 
 //adding the handling for the Kernel crashing here
 void uart_rx_interrupt_handler(void) {
-    // Check for RX interrupt
     if (uart_instance->MIS & ((1 << 4) | (1 << 6))) {
-        while (!(uart_instance->FR & (1 << 4))) {  // Read ALL characters from FIFO
+        while (!(uart_instance->FR & (1 << 4))) {  
             char c = uart_instance->DR & 0xFF;
             switch(c) {
                 case 'd':
@@ -88,7 +87,6 @@ void uart_rx_interrupt_handler(void) {
                     do_undefined_inst();
                     break;
                default:
-                    // Create thread for all other characters
                     scheduler_thread_create(main, &c, sizeof(char));
                     break;
             }

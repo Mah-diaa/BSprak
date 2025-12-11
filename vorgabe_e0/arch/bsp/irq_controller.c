@@ -5,9 +5,7 @@
 #include <arch/cpu/scheduler.h>
 
 void irq_controller_init(void) {
-	// Enable timer interrupt
 	irq_controller_instance->ENABLE_1 |= TIMER_INTERRUPT_MASK;
-	// Enable UART interrupt
 	irq_controller_instance->ENABLE_2 |= UART_INTERRUPT_MASK;
 }
 
