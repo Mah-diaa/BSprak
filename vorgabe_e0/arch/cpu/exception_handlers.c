@@ -3,25 +3,50 @@
 #include <arch/bsp/irq_controller.h>
 #include <arch/bsp/uart.h>
 #include <arch/cpu/scheduler.h>
+#include <arch/cpu/irq.h>
+#include <kernel/syscalls.h>
+#include <lib/kprintf.h>
 #include <stdbool.h>
 
 extern bool irq_debug;
 
+// Syscall dispatch table - function pointers indexed by syscall number
+static void (*syscall_table[])(register_context_t *) = {
+	[SYSCALL_EXIT] = syscall_handler_exit,
+	[SYSCALL_PUTC] = syscall_handler_putc,
+	[SYSCALL_GETC] = syscall_handler_getc,
+	[SYSCALL_CREATE_THREAD] = syscall_handler_create_thread,
+	[SYSCALL_SLEEP] = syscall_handler_sleep,
+};
+
 //the subtraction of 4 or 8 is necessary because of the way the exception trampolines are set up
 void handle_supervisor_call_trampoline(register_context_t* ctx)
 {
-	if (ctx->r0 != 1) {
-		print_exception_infos(ctx, false, false, "Supervisor Call", ctx->lr - 4, 0, 0, 0, 0);
-	}
-	// If in user mode (0b10000), kill the thread; otherwise hang
-	if ((ctx->spsr & 0x1F) == 0x10) {
-		scheduler_end_current_thread(ctx);
-	} else {
+	// Check if called from kernel mode (must be user mode 0b10000)
+	if ((ctx->spsr & 0x1F) != 0x10) {
+		kprintf("ERROR: Syscall invoked from kernel mode!\n");
+		print_exception_infos(ctx, false, false, "Syscall from Kernel", ctx->lr - 4, 0, 0, 0, 0);
 		uart_putc('\4');
 		while (true) {
 		}
 	}
 
+	// Extract syscall number from r7
+	unsigned int syscall_num = ctx->r7;
+
+	// Check if syscall number is valid
+	if (syscall_num > SYSCALL_MAX) {
+		// Unknown syscall - terminate thread with register dump
+		kprintf("ERROR: Unknown syscall %u\n", syscall_num);
+		print_exception_infos(ctx, false, false, "Unknown Syscall", ctx->lr - 4, 0, 0, 0, 0);
+		scheduler_end_current_thread(ctx);
+		return;
+	}
+
+	// Dispatch to syscall handler via function pointer table
+	// Note: Interrupts are already masked in SVC mode
+	// Critical sections within handlers should use irq_disable/restore if needed
+	syscall_table[syscall_num](ctx);
 }
 
 void handle_undefined_instruction_trampoline(register_context_t* ctx)

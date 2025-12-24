@@ -23,6 +23,7 @@ struct tcb {
     void* stack_base;
     unsigned int user_sp;
     unsigned int user_lr;
+    unsigned int sleep_ticks;  // Number of timer ticks remaining to sleep
 };
 
 extern struct tcb tcbs[MAX_THREADS];

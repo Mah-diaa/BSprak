@@ -1,5 +1,6 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-void main(void *args);
+void main [[gnu::weak]] (void *args);
+
 #endif

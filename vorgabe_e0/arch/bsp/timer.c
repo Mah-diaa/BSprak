@@ -1,5 +1,6 @@
 #include <arch/bsp/uart.h>
 #include <arch/bsp/timer.h>
+#include <arch/cpu/scheduler.h>
 #include <lib/kprintf.h>
 #include <config.h>
 #include <stdbool.h>
@@ -18,6 +19,9 @@ void system_timer_interrupt_handler(void) {
 
 	timer_instance->C1 = new_c1;
 	timer_instance->CS |= TIMER_STATUS_1;
+
+	// Decrement sleep counters for sleeping threads
+	scheduler_tick_sleep();
 
 	kprintf("!");
 }

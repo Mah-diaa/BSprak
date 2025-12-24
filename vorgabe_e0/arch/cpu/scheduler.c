@@ -97,3 +97,25 @@ struct tcb* scheduler_get_current_thread(void) {
     }
     return current_thread;
 }
+
+void scheduler_wake_waiting_threads(void) {
+    // Wake all WAITING threads (they can check their condition again)
+    for (int i = 0; i < MAX_THREADS; i++) {
+        if (tcbs[i].state == WAITING) {
+            tcbs[i].state = READY;
+        }
+    }
+}
+
+void scheduler_tick_sleep(void) {
+    // Decrement sleep counters and wake threads whose sleep has expired
+    for (int i = 0; i < MAX_THREADS; i++) {
+        if (tcbs[i].state == WAITING && tcbs[i].sleep_ticks > 0) {
+            tcbs[i].sleep_ticks--;
+            if (tcbs[i].sleep_ticks == 0) {
+                // Sleep expired - make thread ready
+                tcbs[i].state = READY;
+            }
+        }
+    }
+}

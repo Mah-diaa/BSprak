@@ -1,9 +1,11 @@
 #include <arch/bsp/uart.h>
 #include <lib/ringbuffer.h>
+#include <lib/kprintf.h>
 #include <config.h>
 #include <stddef.h>
 #include <assert.h>
 #include <arch/cpu/exception_triggers.h>
+#include <arch/cpu/scheduler.h>
 #include <kernel/threads.h>
 #include <user/main.h>
 #include <stdbool.h>
@@ -63,33 +65,47 @@ char uart_getc(void) {
     return buff_getc(uart_buffer);
 }
 
+bool uart_has_char(void) {
+    return !buff_is_empty(uart_buffer);
+}
+
+bool uart_try_getc(char *out) {
+    if (buff_is_empty(uart_buffer)) {
+        return false;
+    }
+    *out = buff_getc(uart_buffer);
+    return true;
+}
+
 extern bool irq_debug;
 
 //adding the handling for the Kernel crashing here
 void uart_rx_interrupt_handler(void) {
     if (uart_instance->MIS & ((1 << 4) | (1 << 6))) {
-        while (!(uart_instance->FR & (1 << 4))) {  
+        while (!(uart_instance->FR & (1 << 4))) {
             char c = uart_instance->DR & 0xFF;
-            switch(c) {
-                case 'd':
-                    irq_debug = !irq_debug;
-                    break;
-                case 'S':
-                    do_supervisor_call();
-                    break;
-                case 'P':
-                    do_prefetch_abort();
-                    break;
-                case 'A':
-                    do_data_abort();
-                    break;
-                case 'U':
-                    do_undefined_inst();
-                    break;
-               default:
-                    scheduler_thread_create(main, &c, sizeof(char));
-                    break;
+
+            // Handle special commands
+            if (c == 'd') {
+                // Toggle IRQ debug mode
+                irq_debug = !irq_debug;
+                continue;
             }
+
+            if (c == 'S') {
+                // Uppercase 'S' - shutdown the system
+                kprintf("\n\n=== System shutdown requested ===\n");
+                uart_putc('\4');  // EOT character
+                while (true) {
+                    // Halt system
+                }
+            }
+
+            // Put character in ringbuffer for syscall_getc()
+            buff_putc(uart_buffer, c);
+
+            // Wake any threads waiting for input
+            scheduler_wake_waiting_threads();
         }
         uart_instance->ICR = (1 << 4) | (1 << 6);
     }
