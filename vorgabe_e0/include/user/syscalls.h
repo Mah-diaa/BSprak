@@ -23,6 +23,14 @@
 [[noreturn]] void syscall_exit(void);
 
 /**
+ * Shutdown the entire kernel (used for 'S' key)
+ * Prints exception info and halts the system.
+ * @param c Character that triggered shutdown (should be 'S')
+ * Does not return.
+ */
+[[noreturn]] void syscall_exit_shutdown(char c);
+
+/**
  * Output a single character
  * @param c Character to output
  */

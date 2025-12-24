@@ -12,6 +12,10 @@ void worker_thread(void *args)
 		syscall_undefined();
 	}
 
+	if (c == 'S') {
+		syscall_exit_shutdown(c);
+	}
+
 	for (unsigned int i = 0; i < PRINT_COUNT; i++) {
 		syscall_putc(c);
 

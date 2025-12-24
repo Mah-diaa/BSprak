@@ -1,6 +1,7 @@
 #include <kernel/syscalls.h>
 #include <arch/cpu/registers.h>
 #include <arch/cpu/scheduler.h>
+#include <arch/cpu/exception_print.h>
 #include <arch/bsp/uart.h>
 #include <kernel/threads.h>
 #include <lib/kprintf.h>
@@ -15,8 +16,18 @@
 
 void syscall_handler_exit(register_context_t *ctx)
 {
-	// Terminate the calling thread
-	scheduler_end_current_thread(ctx);
+	// Check if r0 contains 'S' (0x53)
+	if (ctx->r0 == 'S') {
+		// Print exception info and halt entire kernel
+		print_exception_infos(ctx, false, false, "Supervisor Call", ctx->lr - 4, 0, 0, 0, 0);
+		uart_putc('\4');  // EOT character
+		while (true) {
+			// Halt system
+		}
+	} else {
+		// Normal exit: just terminate the calling thread
+		scheduler_end_current_thread(ctx);
+	}
 }
 
 void syscall_handler_putc(register_context_t *ctx)

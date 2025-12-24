@@ -1,10 +1,13 @@
 #include <arch/bsp/uart.h>
 #include <lib/ringbuffer.h>
 #include <lib/kprintf.h>
+#include <lib/string.h>
 #include <config.h>
 #include <stddef.h>
 #include <assert.h>
 #include <arch/cpu/exception_triggers.h>
+#include <arch/cpu/exception_print.h>
+#include <arch/cpu/registers.h>
 #include <arch/cpu/scheduler.h>
 #include <kernel/threads.h>
 #include <user/main.h>
@@ -82,14 +85,6 @@ void uart_rx_interrupt_handler(void) {
     if (uart_instance->MIS & ((1 << 4) | (1 << 6))) {
         while (!(uart_instance->FR & (1 << 4))) {
             char c = uart_instance->DR & 0xFF;
-
-            // Handle 'S' - shutdown the entire kernel (syscall_exit equivalent)
-            if (c == 'S') {
-                uart_putc('\4');  // EOT character
-                while (true) {
-                    // Halt system
-                }
-            }
 
             // Put character in ringbuffer for syscall_getc()
             buff_putc(uart_buffer, c);

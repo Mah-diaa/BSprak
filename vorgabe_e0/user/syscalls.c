@@ -16,10 +16,24 @@ void syscall_exit(void)
 {
 	asm volatile(
 		"mov r7, %0\n"
+		"mov r0, #0\n"  // Normal exit
 		"svc #0\n"
 		:
 		: "i"(SYSCALL_EXIT)
-		: "r7"
+		: "r0", "r7"
+	);
+	__builtin_unreachable();
+}
+
+void syscall_exit_shutdown(char c)
+{
+	asm volatile(
+		"mov r7, %1\n"
+		"mov r0, %0\n"  // Pass character
+		"svc #0\n"
+		:
+		: "r"(c), "i"(SYSCALL_EXIT)
+		: "r0", "r7"
 	);
 	__builtin_unreachable();
 }
