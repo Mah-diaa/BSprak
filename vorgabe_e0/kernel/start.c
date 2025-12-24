@@ -11,8 +11,6 @@
 #include <lib/regcheck.h>
 #include <stdbool.h>
 
-bool irq_debug = false;
-
 void start_kernel [[noreturn]] (void) {
 	// Initialize hardware
 	init_uart();

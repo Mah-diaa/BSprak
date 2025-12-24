@@ -8,8 +8,6 @@
 #include <lib/kprintf.h>
 #include <stdbool.h>
 
-extern bool irq_debug;
-
 // Syscall dispatch table - function pointers indexed by syscall number
 static void (*syscall_table[])(register_context_t *) = {
 	[SYSCALL_EXIT] = syscall_handler_exit,
@@ -24,8 +22,8 @@ void handle_supervisor_call_trampoline(register_context_t* ctx)
 {
 	// Check if called from kernel mode (must be user mode 0b10000)
 	if ((ctx->spsr & 0x1F) != 0x10) {
-		kprintf("ERROR: Syscall invoked from kernel mode!\n");
-		print_exception_infos(ctx, false, false, "Syscall from Kernel", ctx->lr - 4, 0, 0, 0, 0);
+		kprintf("Supervisor Call\n");
+		print_exception_infos(ctx, false, false, "Supervisor Call", ctx->lr - 4, 0, 0, 0, 0);
 		uart_putc('\4');
 		while (true) {
 		}
@@ -37,8 +35,7 @@ void handle_supervisor_call_trampoline(register_context_t* ctx)
 	// Check if syscall number is valid
 	if (syscall_num > SYSCALL_MAX) {
 		// Unknown syscall - terminate thread with register dump
-		kprintf("ERROR: Unknown syscall %u\n", syscall_num);
-		print_exception_infos(ctx, false, false, "Unknown Syscall", ctx->lr - 4, 0, 0, 0, 0);
+		print_exception_infos(ctx, false, false, "Supervisor Call", ctx->lr - 4, 0, 0, 0, 0);
 		scheduler_end_current_thread(ctx);
 		return;
 	}
@@ -102,9 +99,6 @@ void handle_not_used_trampoline(register_context_t* ctx)
 void handle_irq_trampoline(register_context_t* ctx)
 {
 	irq_controller_handler(ctx);
-	if (irq_debug) {
-		print_exception_infos(ctx, false, false, "IRQ", ctx->lr - 4, 0, 0, 0, 0);
-	}
 }
 
 void handle_fiq_trampoline(register_context_t* ctx)

@@ -5,8 +5,6 @@
 #include <config.h>
 #include <stdbool.h>
 
-extern bool irq_debug;
-
 void system_timer_init(void) {
 	timer_instance->CS |= TIMER_STATUS_1;
 	unsigned int counter = timer_instance->CLO;

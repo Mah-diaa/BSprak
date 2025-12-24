@@ -77,24 +77,14 @@ bool uart_try_getc(char *out) {
     return true;
 }
 
-extern bool irq_debug;
-
 //adding the handling for the Kernel crashing here
 void uart_rx_interrupt_handler(void) {
     if (uart_instance->MIS & ((1 << 4) | (1 << 6))) {
         while (!(uart_instance->FR & (1 << 4))) {
             char c = uart_instance->DR & 0xFF;
 
-            // Handle special commands
-            if (c == 'd') {
-                // Toggle IRQ debug mode
-                irq_debug = !irq_debug;
-                continue;
-            }
-
+            // Handle 'S' - shutdown the entire kernel (syscall_exit equivalent)
             if (c == 'S') {
-                // Uppercase 'S' - shutdown the system
-                kprintf("\n\n=== System shutdown requested ===\n");
                 uart_putc('\4');  // EOT character
                 while (true) {
                     // Halt system
