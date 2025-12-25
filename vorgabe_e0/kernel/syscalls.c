@@ -6,33 +6,21 @@
 #include <kernel/threads.h>
 #include <lib/kprintf.h>
 
-/**
- * Syscall handler implementations
- *
- * These functions are called from the SVC exception handler.
- * Arguments are passed via registers r0-r3 in the context.
- * Return values (if any) should be placed in ctx->r0.
- */
-
+//special syscall handler for exit syscall on uppercase S
 void syscall_handler_exit(register_context_t *ctx)
 {
-	// Check if r0 contains 'S' (0x53)
 	if (ctx->r0 == 'S') {
-		// Print exception info and halt entire kernel
 		print_exception_infos(ctx, false, false, "Supervisor Call", ctx->lr - 4, 0, 0, 0, 0);
-		uart_putc('\4');  // EOT character
+		uart_putc('\4');
 		while (true) {
-			// Halt system
 		}
 	} else {
-		// Normal exit: just terminate the calling thread
 		scheduler_end_current_thread(ctx);
 	}
 }
 
 void syscall_handler_putc(register_context_t *ctx)
 {
-	// char c is in r0
 	char c = (char)ctx->r0;
 	uart_putc(c);
 }
@@ -40,55 +28,40 @@ void syscall_handler_putc(register_context_t *ctx)
 void syscall_handler_getc(register_context_t *ctx)
 {
 	char c;
-	// Try to get a character
 	if (uart_try_getc(&c)) {
-		// Character available - return it in r0
 		ctx->r0 = (unsigned int)c;
-	} else {
-		// No character available - block this thread
+	} else {//blocking case
 		struct tcb *current = scheduler_get_current_thread();
 		if (current) {
 			current->state = WAITING;
 		}
-
-		// Adjust return address to re-execute the SVC instruction
-		// When thread wakes up, it will retry syscall_getc
 		ctx->lr -= 4;  // Move back to the SVC instruction
-
-		// Scheduler will switch to another thread
-		// When this thread is woken and scheduled again, it will retry the syscall
 		scheduler_schedule(ctx);
+		//switch to another thread, this thread will wake up later when char is available
 	}
 }
 
 void syscall_handler_create_thread(register_context_t *ctx)
 {
-	// Arguments: r0 = function pointer, r1 = args pointer, r2 = arg_size
+	//r0 = function pointer, r1 = args pointer, r2 = arg_size
 	void (*func)(void *) = (void (*)(void *))ctx->r0;
 	void *args = (void *)ctx->r1;
 	unsigned int arg_size = ctx->r2;
-
-	// Call existing thread creation function
 	scheduler_thread_create(func, args, arg_size);
 }
 
 void syscall_handler_sleep(register_context_t *ctx)
 {
 	unsigned int cycles = ctx->r0;
-
-	// Handle sleep(0) - just yield to scheduler without blocking
-	if (cycles == 0) {
+	if (cycles == 0) {//case for 0 sleep, just yield
 		scheduler_schedule(ctx);
 		return;
 	}
-
 	// Block thread for specified number of timer ticks
 	struct tcb *current = scheduler_get_current_thread();
 	if (current) {
 		current->sleep_ticks = cycles;
 		current->state = WAITING;
 	}
-
-	// Yield to scheduler
-	scheduler_schedule(ctx);
+	scheduler_schedule(ctx);//give back CPU to another thread
 }

@@ -20,11 +20,9 @@ void worker_thread(void *args)
 		syscall_putc(c);
 
 		if (c >= 'A' && c <= 'Z') {
-			// Active waiting (busy loop)
 			for (volatile unsigned int j = 0; j < BUSY_WAIT_COUNTER * ((unsigned int)c - 'A'); j++) {
 			}
 		} else if (c >= 'a' && c <= 'z') {
-			// Passive waiting (sleep)
 			syscall_sleep((unsigned int)c - 'a');
 		} else {
 			syscall_sleep(1);

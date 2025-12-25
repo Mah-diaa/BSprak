@@ -4,7 +4,6 @@
 
 struct tcb tcbs[MAX_THREADS];
 
-// Weak reference to user-space syscall_exit
 // This allows kernel to compile independently, but links to user version when available
 extern void syscall_exit(void) __attribute__((weak, noreturn));
 extern struct tcb* scheduler_get_current_thread(void);

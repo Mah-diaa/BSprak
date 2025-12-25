@@ -38,9 +38,9 @@ static_assert(offsetof(struct uart, ICR) == 0x44);
 void init_uart();
 void uart_putc(char c);
 char uart_getc();
-bool uart_has_char(void);  /* Check if character is available without blocking */
-bool uart_try_getc(char *out);  /* Try to get character, returns true if successful */
-void uart_rx_interrupt_handler(void);  /* Call this from IRQ handler when UART RX interrupt occurs */
+bool uart_has_char(void);
+bool uart_try_getc(char *out);
+void uart_rx_interrupt_handler(void);
 void uart_loopback [[noreturn]] (void);
 
 #endif
