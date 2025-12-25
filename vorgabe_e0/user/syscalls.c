@@ -1,30 +1,20 @@
 #include <user/syscalls.h>
 
-/**
- * User-space syscall wrappers
- *
- * These functions provide the user-space API for system calls.
- * They use inline assembly to invoke SVC with the appropriate syscall number.
- *
- * Calling convention:
- * - r7 = syscall number
- * - r0-r3 = arguments
- * - r0 = return value
- */
-
 void syscall_exit(void)
 {
 	asm volatile(
 		"mov r7, %0\n"
-		"mov r0, #0\n"  // Normal exit
+		"mov r0, #0\n"
 		"svc #0\n"
 		:
 		: "i"(SYSCALL_EXIT)
 		: "r0", "r7"
 	);
 	__builtin_unreachable();
+	//this is a compiler builtin, basically acts as [[noreturn]] but inline ~M
 }
 
+//special wrapper for when 'S' is entered
 void syscall_exit_shutdown(char c)
 {
 	asm volatile(
@@ -92,7 +82,6 @@ void syscall_sleep(unsigned int cycles)
 
 void syscall_undefined(void)
 {
-	// Use an invalid syscall number to trigger unknown syscall handler
 	asm volatile(
 		"mov r7, #255\n"
 		"svc #0\n"

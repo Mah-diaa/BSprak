@@ -3,7 +3,6 @@
 #include <arch/bsp/irq_controller.h>
 #include <arch/bsp/uart.h>
 #include <arch/cpu/scheduler.h>
-#include <arch/cpu/irq.h>
 #include <kernel/syscalls.h>
 #include <lib/kprintf.h>
 #include <stdbool.h>
@@ -41,8 +40,6 @@ void handle_supervisor_call_trampoline(register_context_t* ctx)
 	}
 
 	// Dispatch to syscall handler via function pointer table
-	// Note: Interrupts are already masked in SVC mode
-	// Critical sections within handlers should use irq_disable/restore if needed
 	syscall_table[syscall_num](ctx);
 }
 
