@@ -7,7 +7,7 @@
 #include <lib/kprintf.h>
 #include <stdbool.h>
 
-// Syscall dispatch table - function pointers indexed by syscall number
+// Syscall handler function pointer table, much cleaner than switches ~M
 static void (*syscall_table[])(register_context_t *) = {
 	[SYSCALL_EXIT] = syscall_handler_exit,
 	[SYSCALL_PUTC] = syscall_handler_putc,
@@ -27,19 +27,15 @@ void handle_supervisor_call_trampoline(register_context_t* ctx)
 		while (true) {
 		}
 	}
-
-	// Extract syscall number from r7
 	unsigned int syscall_num = ctx->r7;
 
-	// Check if syscall number is valid
 	if (syscall_num > SYSCALL_MAX) {
-		// Unknown syscall - terminate thread with register dump
+		// Unknown syscall
 		print_exception_infos(ctx, false, false, "Supervisor Call", ctx->lr - 4, 0, 0, 0, 0);
 		scheduler_end_current_thread(ctx);
 		return;
 	}
 
-	// Dispatch to syscall handler via function pointer table
 	syscall_table[syscall_num](ctx);
 }
 
