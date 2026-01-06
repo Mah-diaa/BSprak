@@ -9,6 +9,9 @@
 #define UART_RT_INTERRUPT (1 << 6)
 #define UART_RX_RT_INTERRUPTS (UART_RX_INTERRUPT | UART_RT_INTERRUPT)
 
+#define UART_FR_RXFE (1 << 4)
+#define UART_FR_TXFF (1 << 5)
+
 struct uart {
 	unsigned int DR;
 	unsigned int RSRECR;

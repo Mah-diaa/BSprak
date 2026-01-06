@@ -48,7 +48,7 @@ void init_uart(){
 	uart_instance->ICR = UART_RX_RT_INTERRUPTS;
 	uart_instance->IMSC = UART_RX_RT_INTERRUPTS;
 
-	while (!(uart_instance->FR & (1 << 4))) {  // While RX FIFO not empty
+	while (!(uart_instance->FR & UART_FR_RXFE)) {
 		char c = uart_instance->DR & 0xFF;
 		buff_putc(uart_buffer, c);
 	}
@@ -57,7 +57,7 @@ void init_uart(){
 }
 
 void uart_putc(char c) {
-    while (uart_instance->FR & (1 << 5)) { }
+    while (uart_instance->FR & UART_FR_TXFF) { }
     uart_instance->DR = c;
 }
 
@@ -81,7 +81,7 @@ bool uart_try_getc(char *out) {
 void uart_rx_interrupt_handler(void) {
     if (uart_instance->MIS & UART_RX_RT_INTERRUPTS) {
         uart_instance->ICR = UART_RX_RT_INTERRUPTS;
-        while (!(uart_instance->FR & (1 << 4))) {
+        while (!(uart_instance->FR & UART_FR_RXFE)) {
             char c = uart_instance->DR & 0xFF;
 
             buff_putc(uart_buffer, c);

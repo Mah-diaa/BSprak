@@ -22,13 +22,17 @@ void syscall_handler_exit(register_context_t *ctx)
 void syscall_handler_putc(register_context_t *ctx)
 {
 	char c = (char)ctx->r0;
+	asm volatile("cpsid i");
 	uart_putc(c);
+	asm volatile("cpsie i");
 }
 
 void syscall_handler_getc(register_context_t *ctx)
 {
 	char c;
+	asm volatile("cpsid i");
 	if (uart_try_getc(&c)) {
+		asm volatile("cpsie i");
 		ctx->r0 = (unsigned int)c;
 	} else {//if uart is blocked or empty
 		struct tcb *current = scheduler_get_current_thread();
@@ -36,6 +40,7 @@ void syscall_handler_getc(register_context_t *ctx)
 			current->state = WAITING;
 		}
 		ctx->lr -= 4;  // Move back to the SVC instruction
+		asm volatile("cpsie i");
 		scheduler_schedule(ctx);
 	}
 }
@@ -52,14 +57,14 @@ void syscall_handler_create_thread(register_context_t *ctx)
 void syscall_handler_sleep(register_context_t *ctx)
 {
 	unsigned int cycles = ctx->r0;
-	if (cycles == 0) {
-		scheduler_schedule(ctx);
-		return;
-	}
 	struct tcb *current = scheduler_get_current_thread();
 	if (current) {
-		current->sleep_ticks = cycles;
-		current->state = WAITING;
+		if (cycles == 0) {
+			current->state = READY;
+		} else {
+			current->sleep_ticks = cycles;
+			current->state = WAITING;
+		}
 	}
 	scheduler_schedule(ctx);//give back control to another thread
 }
