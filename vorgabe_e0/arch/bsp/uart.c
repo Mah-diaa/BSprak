@@ -45,17 +45,15 @@ void init_uart(){
 	uart_instance->CR |= 3 << 8; //enable txd and rxd
 	uart_instance->CR |= 1 << 0;//enable uart
 
-	// Clear RX and RX timeout interrupts before enabling as per docs
-	uart_instance->ICR = (1 << 4) | (1 << 6);
-	uart_instance->IMSC = (1 << 4) | (1 << 6);
+	uart_instance->ICR = UART_RX_RT_INTERRUPTS;
+	uart_instance->IMSC = UART_RX_RT_INTERRUPTS;
 
-	// drain any characters that arrived early may help with fast incoming chars 
 	while (!(uart_instance->FR & (1 << 4))) {  // While RX FIFO not empty
 		char c = uart_instance->DR & 0xFF;
 		buff_putc(uart_buffer, c);
 	}
 
-	uart_instance->ICR = (1 << 4) | (1 << 6);
+	uart_instance->ICR = UART_RX_RT_INTERRUPTS;
 }
 
 void uart_putc(char c) {
@@ -80,19 +78,16 @@ bool uart_try_getc(char *out) {
     return true;
 }
 
-//adding the handling for the Kernel crashing here
 void uart_rx_interrupt_handler(void) {
-    if (uart_instance->MIS & ((1 << 4) | (1 << 6))) {
+    if (uart_instance->MIS & UART_RX_RT_INTERRUPTS) {
+        uart_instance->ICR = UART_RX_RT_INTERRUPTS;
         while (!(uart_instance->FR & (1 << 4))) {
             char c = uart_instance->DR & 0xFF;
 
-            // Put character in ringbuffer for syscall_getc()
             buff_putc(uart_buffer, c);
 
-            // Wake any threads waiting for input
             scheduler_wake_waiting_threads();
         }
-        uart_instance->ICR = (1 << 4) | (1 << 6);
     }
 }
 

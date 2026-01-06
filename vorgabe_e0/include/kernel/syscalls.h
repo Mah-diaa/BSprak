@@ -2,12 +2,10 @@
 
 #include <arch/cpu/registers.h>
 
-
- // Syscall convention:
-
- // * - r7: Syscall number
- // * - r0-r3: Arguments
- // * - r0: Return value if needed
+// Syscall convention:
+// * - r7: Syscall number
+// * - r0-r3: Arguments
+// * - r0: Return value if needed
 
 
 #define SYSCALL_EXIT            0

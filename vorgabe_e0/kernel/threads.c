@@ -1,10 +1,11 @@
 #include <kernel/threads.h>
 #include <lib/kprintf.h>
 #include <lib/string.h>
+#include <arch/cpu/psr.h>
 
 struct tcb tcbs[MAX_THREADS];
 
-// This allows kernel to compile independently, but links to user version when available
+//allows kernel to compile independantly but links to user version when available
 extern void syscall_exit(void) __attribute__((weak, noreturn));
 extern struct tcb* scheduler_get_current_thread(void);
 
@@ -31,7 +32,7 @@ static int find_free_thread_slot(void) {
 
 void scheduler_thread_create(void (*func)(void*), const void *arg, unsigned int arg_size) {
     int tid = find_free_thread_slot();
-    if (tid < 0) {//max threads
+    if (tid < 0) {
         kprintf("Could not create thread\n");
         return;
     }
@@ -57,5 +58,5 @@ void scheduler_thread_create(void (*func)(void*), const void *arg, unsigned int 
     tcb->user_sp = stack_pointer;
     tcb->user_lr = (unsigned int)thread_wrapper;
     context->r0 = stack_pointer;
-    context->spsr = 0x10;
+    context->spsr = PSR_USR;
 }

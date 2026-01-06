@@ -10,6 +10,8 @@
 #include <lib/regcheck.h>
 #include <stdbool.h>
 
+extern void idle_thread(void);
+
 void start_kernel [[noreturn]] (void) {
 	init_uart();
 	irq_controller_init();
@@ -19,7 +21,7 @@ void start_kernel [[noreturn]] (void) {
 	test_kernel();
 	scheduler_thread_create(main, NULL, 0);
 	scheduler_enable();
-	while(true) {
-	}
+	idle_thread();
+	__builtin_unreachable();
 }
 

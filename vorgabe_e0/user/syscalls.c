@@ -12,14 +12,15 @@ void syscall_exit(void)
 	);
 	__builtin_unreachable();
 	//this is a compiler builtin, basically acts as [[noreturn]] but inline ~M
+	//https://stackoverflow.com/questions/54764535/what-optimizations-does-builtin-unreachable-facilitate
 }
 
-//special wrapper for when 'S' is entered
+//special wrapper for when S is entered
 void syscall_exit_shutdown(char c)
 {
 	asm volatile(
 		"mov r7, %1\n"
-		"mov r0, %0\n"  // Pass character
+		"mov r0, %0\n"  //
 		"svc #0\n"
 		:
 		: "r"(c), "i"(SYSCALL_EXIT)

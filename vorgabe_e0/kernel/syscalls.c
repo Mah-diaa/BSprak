@@ -6,7 +6,7 @@
 #include <kernel/threads.h>
 #include <lib/kprintf.h>
 
-//special syscall handler for exit syscall on uppercase S
+//special syscall handler for exit syscall on upercase S
 void syscall_handler_exit(register_context_t *ctx)
 {
 	if (ctx->r0 == 'S') {
@@ -30,14 +30,13 @@ void syscall_handler_getc(register_context_t *ctx)
 	char c;
 	if (uart_try_getc(&c)) {
 		ctx->r0 = (unsigned int)c;
-	} else {//blocking case
+	} else {//if uart is blocked or empty
 		struct tcb *current = scheduler_get_current_thread();
 		if (current) {
 			current->state = WAITING;
 		}
 		ctx->lr -= 4;  // Move back to the SVC instruction
 		scheduler_schedule(ctx);
-		//switch to another thread, this thread will wake up later when char is available
 	}
 }
 
@@ -53,15 +52,14 @@ void syscall_handler_create_thread(register_context_t *ctx)
 void syscall_handler_sleep(register_context_t *ctx)
 {
 	unsigned int cycles = ctx->r0;
-	if (cycles == 0) {//case for 0 sleep, just yield
+	if (cycles == 0) {
 		scheduler_schedule(ctx);
 		return;
 	}
-	// Block thread for specified number of timer ticks
 	struct tcb *current = scheduler_get_current_thread();
 	if (current) {
 		current->sleep_ticks = cycles;
 		current->state = WAITING;
 	}
-	scheduler_schedule(ctx);//give back CPU to another thread
+	scheduler_schedule(ctx);//give back control to another thread
 }

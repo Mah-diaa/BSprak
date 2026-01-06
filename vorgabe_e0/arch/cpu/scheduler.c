@@ -2,6 +2,7 @@
 #include <lib/kprintf.h>
 #include <lib/string.h>
 #include <arch/bsp/uart.h>
+#include <arch/cpu/psr.h>
 #include <stdbool.h>
 
 bool scheduler_enabled = false;
@@ -66,7 +67,7 @@ void scheduler_schedule(register_context_t *ctx) {
 
     if (next_thread == &idle_tcb) {//special case when switching to idle thread
         memset(ctx, 0, sizeof(register_context_t));
-        ctx->spsr = 0x13;
+        ctx->spsr = PSR_SVC;
         ctx->lr = (unsigned int)idle_thread;
     } else {
         *ctx = next_thread->context;

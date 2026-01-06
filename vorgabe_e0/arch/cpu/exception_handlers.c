@@ -3,11 +3,11 @@
 #include <arch/bsp/irq_controller.h>
 #include <arch/bsp/uart.h>
 #include <arch/cpu/scheduler.h>
+#include <arch/cpu/psr.h>
 #include <kernel/syscalls.h>
 #include <lib/kprintf.h>
 #include <stdbool.h>
 
-// Syscall handler function pointer table, much cleaner than switches ~M
 static void (*syscall_table[])(register_context_t *) = {
 	[SYSCALL_EXIT] = syscall_handler_exit,
 	[SYSCALL_PUTC] = syscall_handler_putc,
@@ -16,11 +16,9 @@ static void (*syscall_table[])(register_context_t *) = {
 	[SYSCALL_SLEEP] = syscall_handler_sleep,
 };
 
-//the subtraction of 4 or 8 is necessary because of the way the exception trampolines are set up
 void handle_supervisor_call_trampoline(register_context_t* ctx)
 {
-	// Check if called from kernel mode (must be user mode 0b10000)
-	if ((ctx->spsr & 0x1F) != 0x10) {
+	if ((ctx->spsr & PSR_MODE_MASK) != PSR_USR) {
 		kprintf("Supervisor Call\n");
 		print_exception_infos(ctx, false, false, "Supervisor Call", ctx->lr - 4, 0, 0, 0, 0);
 		uart_putc('\4');
@@ -28,21 +26,18 @@ void handle_supervisor_call_trampoline(register_context_t* ctx)
 		}
 	}
 	unsigned int syscall_num = ctx->r7;
-
 	if (syscall_num > SYSCALL_MAX) {
-		// Unknown syscall
 		print_exception_infos(ctx, false, false, "Supervisor Call", ctx->lr - 4, 0, 0, 0, 0);
 		scheduler_end_current_thread(ctx);
 		return;
 	}
-
 	syscall_table[syscall_num](ctx);
 }
 
 void handle_undefined_instruction_trampoline(register_context_t* ctx)
 {
 	print_exception_infos(ctx, false, false, "Undefined Instruction", ctx->lr - 4, 0, 0, 0, 0);
-	if ((ctx->spsr & 0x1F) == 0x10) {
+	if ((ctx->spsr & PSR_MODE_MASK) == PSR_USR) {
 		scheduler_end_current_thread(ctx);
 	} else {
 		uart_putc('\4');
@@ -57,7 +52,7 @@ void handle_prefetch_abort_trampoline(register_context_t* ctx)
 	asm volatile("mrc p15, 0, %0, c5, c0, 1" : "=r" (ifsr));
 	asm volatile("mrc p15, 0, %0, c6, c0, 2" : "=r" (ifar));
 	print_exception_infos(ctx, false, true, "Prefetch Abort", ctx->lr - 4, 0, 0, ifsr, ifar);
-	if ((ctx->spsr & 0x1F) == 0x10) {
+	if ((ctx->spsr & PSR_MODE_MASK) == PSR_USR) {
 		scheduler_end_current_thread(ctx);
 	} else {
 		uart_putc('\4');
@@ -72,7 +67,7 @@ void handle_data_abort_trampoline(register_context_t* ctx)
 	asm volatile("mrc p15, 0, %0, c5, c0, 0" : "=r" (dfsr));
 	asm volatile("mrc p15, 0, %0, c6, c0, 0" : "=r" (dfar));
 	print_exception_infos(ctx, true, false, "Data Abort", ctx->lr - 8, dfsr, dfar, 0, 0);
-	if ((ctx->spsr & 0x1F) == 0x10) {
+	if ((ctx->spsr & PSR_MODE_MASK) == PSR_USR) {
 		scheduler_end_current_thread(ctx);
 	} else {
 		uart_putc('\4');
