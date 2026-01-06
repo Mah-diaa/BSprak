@@ -8,6 +8,7 @@ void worker_thread(void *args)
 	test_user(args);
 
 	char c = *((char *)args);
+
 	if (c == 's') {
 		syscall_undefined();
 	}

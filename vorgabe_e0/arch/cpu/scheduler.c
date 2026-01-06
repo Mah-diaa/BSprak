@@ -51,10 +51,6 @@ void scheduler_schedule(register_context_t *ctx) {
         return;
     }
 
-    if (current_thread != &idle_tcb && next_thread != &idle_tcb) {//do not print context switch to/from idle thread
-        kprintf("\n");
-    }
-
     if (current_thread != &idle_tcb) {
         current_thread->context = *ctx;
         asm volatile("mrs %0, sp_usr" : "=r"(current_thread->user_sp));
