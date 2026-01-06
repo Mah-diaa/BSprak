@@ -52,14 +52,11 @@ void syscall_handler_create_thread(register_context_t *ctx)
 void syscall_handler_sleep(register_context_t *ctx)
 {
 	unsigned int cycles = ctx->r0;
-	struct tcb *current = scheduler_get_current_thread();
 	if (cycles == 0) {
-		if (current) {
-			current->state = READY;
-		}
 		scheduler_schedule(ctx);
 		return;
 	}
+	struct tcb *current = scheduler_get_current_thread();
 	if (current) {
 		current->sleep_ticks = cycles;
 		current->state = WAITING;
