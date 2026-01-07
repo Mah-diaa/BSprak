@@ -17,8 +17,5 @@ void system_timer_interrupt_handler(void) {
 
 	timer_instance->C1 = new_c1;
 	timer_instance->CS |= TIMER_STATUS_1;
-
 	scheduler_tick_sleep();
-
-	kprintf("!");
 }
